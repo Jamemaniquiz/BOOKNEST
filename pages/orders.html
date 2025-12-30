@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - BookNest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/orders.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-book-open"></i>
+                <span>BookNest</span>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link">
+                    <i class="fas fa-store"></i> SHOP
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> CART
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="orders.html" class="nav-link active">
+                    <i class="fas fa-receipt"></i> ORDERS
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="user-btn" id="userBtn">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-book-open"></i>
+                <span>BookNest</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="../index.html" class="sidebar-link">
+                <i class="fas fa-store"></i> ON HAND STORE
+            </a>
+            <a href="orders.html" class="sidebar-link active">
+                <i class="fas fa-receipt"></i> ORDERS AND INVOICES
+            </a>
+            <a href="support.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> Customer Service
+            </a>
+            <a href="login.html" class="sidebar-link" id="authLink">
+                <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h1><i class="fas fa-receipt"></i> My Orders</h1>
+        </div>
+
+        <div class="orders-tabs">
+            <button class="tab-btn active" data-tab="all">All Orders</button>
+            <button class="tab-btn" data-tab="pending">Pending</button>
+            <button class="tab-btn" data-tab="completed">Completed</button>
+            <button class="tab-btn" data-tab="cancelled">Cancelled</button>
+        </div>
+
+        <div id="ordersContainer" class="orders-container">
+            <!-- Orders will be loaded here -->
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/cart.js"></script>
+    <script src="../js/orders.js"></script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - BookNest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem 1rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+        .sidebar-link:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+        .sidebar-link.active {
+            background: #667eea;
+            color: white;
+        }
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .profile-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 3rem;
+            color: white;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        .message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        .info-text {
+            background: #bee3f8;
+            color: #2c5282;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #4299e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-book-open"></i>
+                <span>BookNest</span>
+            </div>
+            <nav>
+                <a href="admin.html" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i> Overview
+                </a>
+                <a href="admin.html#books" class="sidebar-link">
+                    <i class="fas fa-book"></i> Manage Books
+                </a>
+                <a href="orders.html" class="sidebar-link">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </a>
+                <a href="admin.html#users" class="sidebar-link">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="../index.html" class="sidebar-link">
+                    <i class="fas fa-store"></i> View Shop
+                </a>
+                <a href="admin-profile.html" class="sidebar-link active">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+                <a href="#" class="sidebar-link" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h1>Admin Profile</h1>
+                    <p style="color: #718096;">jamesmaniquiz7@gmail.com</p>
+                </div>
+
+                <div id="messageDiv" class="message"></div>
+
+                <div class="info-text">
+                    <i class="fas fa-info-circle"></i> Current password: <span id="currentPasswordDisplay">••••••••</span>
+                    <i class="fas fa-eye" id="toggleCurrentPassword" style="cursor: pointer; margin-left: 10px;"></i>
+                </div>
+
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" required style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleCurrentPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" required minlength="6" style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleNewPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6" style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleConfirmPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check if admin is logged in
+        if (localStorage.getItem('adminLoggedIn') !== '1') {
+            window.location.href = 'admin-login.html';
+        }
+
+        const form = document.getElementById('changePasswordForm');
+        const messageDiv = document.getElementById('messageDiv');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const currentPasswordDisplay = document.getElementById('currentPasswordDisplay');
+        const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+
+        // Get stored password
+        const storedPassword = localStorage.getItem('adminPassword') || 'admin123';
+
+        // Toggle display of current password
+        let isPasswordVisible = false;
+        toggleCurrentPassword.addEventListener('click', function() {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                currentPasswordDisplay.textContent = storedPassword;
+                toggleCurrentPassword.classList.remove('fa-eye');
+                toggleCurrentPassword.classList.add('fa-eye-slash');
+            } else {
+                currentPasswordDisplay.textContent = '••••••••';
+                toggleCurrentPassword.classList.remove('fa-eye-slash');
+                toggleCurrentPassword.classList.add('fa-eye');
+            }
+        });
+
+        // Toggle password input fields
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggle = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+            
+            toggle.addEventListener('click', function() {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                if (type === 'text') {
+                    toggle.classList.remove('fa-eye');
+                    toggle.classList.add('fa-eye-slash');
+                } else {
+                    toggle.classList.remove('fa-eye-slash');
+                    toggle.classList.add('fa-eye');
+                }
+            });
+        }
+
+        setupPasswordToggle('toggleCurrentPassInput', 'currentPassword');
+        setupPasswordToggle('toggleNewPassInput', 'newPassword');
+        setupPasswordToggle('toggleConfirmPassInput', 'confirmPassword');
+
+        // Logout
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'admin-login.html';
+        });
+
+        // Change password
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate current password
+            if (currentPassword !== storedPassword) {
+                showMessage('Current password is incorrect', 'error');
+                return;
+            }
+
+            // Validate new passwords match
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match', 'error');
+                return;
+            }
+
+            // Validate new password length
+            if (newPassword.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // Save new password
+            localStorage.setItem('adminPassword', newPassword);
+
+            // Update the stored password variable
+            storedPassword = newPassword;
+
+            // Hide password again after change
+            currentPasswordDisplay.textContent = '••••••••';
+            isPasswordVisible = false;
+            toggleCurrentPassword.classList.remove('fa-eye-slash');
+            toggleCurrentPassword.classList.add('fa-eye');
+
+            showMessage('Password changed successfully!', 'success');
+
+            // Clear form
+            form.reset();
+        });
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

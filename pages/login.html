@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BookNest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo" id="secretAdminLogo" style="cursor:pointer;">
+                <i class="fas fa-book-open"></i>
+                <h1>BookNest</h1>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Sign Up</button>
+            </div>
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2>Welcome Back!</h2>
+                            <p class="auth-subtitle">Please enter your Gmail address</p>
+                            <div class="form-group">
+                                <label for="loginEmail">Gmail Address</label>
+                                <input type="email" id="loginEmail" class="form-input" placeholder="yourname@gmail.com" required>
+                                <small class="input-hint">Only Gmail addresses (@gmail.com) are accepted</small>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="agreeLogin" required>
+                                <label for="agreeLogin">I agree to the terms and conditions <span class="required-mark">*</span></label>
+                            </div>
+                            <button type="submit" class="btn-submit" id="loginBtn" disabled>
+                                LOGIN
+                            </button>
+                            <div class="auth-divider">
+                                <span>OR</span>
+                            </div>
+                            <div id="googleLoginButtonDiv" style="display: flex; justify-content: center;"></div>
+                            <div id="confirmation-section" style="display:none; margin-top:20px; padding: 1.5rem; background: #f0f9ff; border-radius: 10px; border: 2px solid #667eea;">
+                                <div style="text-align: center; margin-bottom: 1rem;">
+                                    <i class="fas fa-envelope" style="font-size: 2.5rem; color: #667eea; margin-bottom: 0.5rem;"></i>
+                                    <h3 style="margin: 0.5rem 0; color: #3a2e5c;">Verify Your Email</h3>
+                                    <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">A 6-digit code has been sent to your Gmail</p>
+                                </div>
+                                <label for="confirmation-code" style="display: block; font-weight: 600; color: #3a2e5c; margin-bottom: 0.5rem;">Confirmation Code</label>
+                                <input type="text" id="confirmation-code" maxlength="6" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.2rem; padding: 0.75rem; margin-bottom: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; width: 100%;">
+                                <button type="button" id="confirm-btn" style="width: 100%; padding: 0.75rem; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Confirm Code</button>
+                                <div id="confirmation-message" style="color:#c00; margin-top:0.75rem; text-align: center; font-weight: 500;"></div>
+                            </div>
+                        </form>
+                        <!-- Register Form -->
+                        <form id="registerForm" class="auth-form">
+                            <h2>Create Account</h2>
+                            <p class="auth-subtitle">Join BookNest today with your Gmail</p>
+                            
+                            <!-- Input Section -->
+                            <div id="register-inputs-section">
+                                <div class="form-group">
+                                    <label for="registerName">Full Name</label>
+                                    <input type="text" id="registerName" class="form-input" placeholder="Enter your full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerEmail">Gmail Address</label>
+                                    <input type="email" id="registerEmail" class="form-input" placeholder="yourname@gmail.com" required>
+                                    <small class="input-hint">Only Gmail addresses (@gmail.com) are accepted</small>
+                                </div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="agreeTerms" required>
+                                    <label for="agreeTerms">I agree to the terms and conditions <span class="required-mark">*</span></label>
+                                </div>
+                                <button type="submit" class="btn-submit" id="registerBtn" disabled>
+                                    SIGN UP
+                                </button>
+                                <div class="auth-divider">
+                                    <span>OR</span>
+                                </div>
+                                <div id="googleRegisterButtonDiv" style="display: flex; justify-content: center;"></div>
+                            </div>
+                            
+                            <!-- Verification Section (Hidden until form submitted) -->
+                            <div id="register-verification-section" style="display:none;">
+                                <div style="text-align: center; margin-bottom: 1.5rem;">
+                                    <i class="fas fa-envelope" style="font-size: 2.5rem; color: #667eea; margin-bottom: 0.5rem;"></i>
+                                    <h3 style="margin: 0.5rem 0; color: #3a2e5c;">Verify Your Email</h3>
+                                    <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">A 6-digit code has been sent to<br><strong id="verification-email-display"></strong></p>
+                                </div>
+                                <label for="register-confirmation-code" style="display: block; font-weight: 600; color: #3a2e5c; margin-bottom: 0.5rem;">Confirmation Code</label>
+                                <input type="text" id="register-confirmation-code" maxlength="6" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.2rem; padding: 0.75rem; margin-bottom: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; width: 100%;">
+                                <button type="button" id="register-confirm-btn" style="width: 100%; padding: 0.75rem; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Confirm Code</button>
+                                <div id="register-confirmation-message" style="color:#c00; margin-top:0.75rem; text-align: center; font-weight: 500;"></div>
+                            </div>
+                        </form>
+            </form>
+            
+            <div class="auth-footer">
+                <!-- Back to Shop link removed -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/auth.js"></script>
+    <script src="../js/login.js"></script>
+    <script>
+    // Tab switching logic
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const tabName = this.getAttribute('data-tab');
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Form').classList.add('active');
+        });
+    });
+    // BookNest logo no longer links to admin login
+    </script>
+</body>
+</html>
