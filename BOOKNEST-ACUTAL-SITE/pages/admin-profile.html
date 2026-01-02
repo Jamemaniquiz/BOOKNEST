@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
+    <style>
+        .admin-layout {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 2rem 1rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2F5D62;
+            margin-bottom: 2.5rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .sidebar-link:hover {
+            background: #f0f9ff;
+            color: #2F5D62;
+            transform: translateX(5px);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(47, 93, 98, 0.3);
+        }
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            margin: 2rem auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .profile-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3.5rem;
+            color: white;
+            box-shadow: 0 10px 25px rgba(47, 93, 98, 0.3);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            color: #1e293b;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2F5D62;
+            box-shadow: 0 0 0 4px rgba(47, 93, 98, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(47, 93, 98, 0.4);
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-weight: 500;
+        }
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        /* Maintenance Toggle Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #ef4444;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .maintenance-control {
+            background: #fff1f2;
+            border: 2px solid #fecaca;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .maintenance-info h3 {
+            color: #991b1b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .maintenance-info p {
+            color: #7f1d1d;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    </style>
+            background: #f0fdfa;
+            color: #134e4a;
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid #ccfbf1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%; margin-right: 10px;">
+                <span>BookNest</span>
+            </div>
+            <nav>
+                <a href="admin.html" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i> Overview
+                </a>
+                <a href="admin.html#books" class="sidebar-link">
+                    <i class="fas fa-book"></i> Manage Books
+                </a>
+                <a href="orders.html" class="sidebar-link">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </a>
+                <a href="admin.html#users" class="sidebar-link">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="admin-cs.html" class="sidebar-link">
+                    <i class="fas fa-headset"></i> Customer Service
+                </a>
+                <a href="#" class="sidebar-link" onclick="handleViewShop(); return false;">
+                    <i class="fas fa-store"></i> View Shop
+                </a>
+                <a href="admin-profile.html" class="sidebar-link active">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+                <a href="#" class="sidebar-link" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h1>Admin Profile</h1>
+                    <p style="color: #718096;">jamesmaniquiz7@gmail.com</p>
+                </div>
+
+                <div id="messageDiv" class="message"></div>
+
+                <!-- Maintenance Mode Control -->
+                <div class="maintenance-control">
+                    <div class="maintenance-info">
+                        <h3><i class="fas fa-power-off"></i> Emergency Shutdown</h3>
+                        <p>Enable this to block buyers from accessing the site. Admin access remains active.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="maintenanceToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- Password Info Removed as requested -->
+
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" required style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleCurrentPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" required minlength="6" style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleNewPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" required minlength="6" style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleConfirmPassInput" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/books-data.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script>
+        // Check if admin is logged in
+        if (!auth.isLoggedIn() || !auth.isAdmin()) {
+            window.location.href = 'admin-login.html';
+        }
+
+        const form = document.getElementById('changePasswordForm');
+        const messageDiv = document.getElementById('messageDiv');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const maintenanceToggle = document.getElementById('maintenanceToggle');
+
+        // Initialize Maintenance Toggle
+        if (maintenanceToggle) {
+            const isMaintenance = localStorage.getItem('site_maintenance_mode') === 'true';
+            maintenanceToggle.checked = isMaintenance;
+
+            maintenanceToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    const confirmShutdown = confirm('⚠️ ARE YOU SURE?\n\nThis will block ALL buyers from accessing the site immediately.\nOnly admins will be able to log in.');
+                    if (confirmShutdown) {
+                        localStorage.setItem('site_maintenance_mode', 'true');
+                        showMessage('System Shutdown Enabled. Buyers are blocked.', 'error');
+                    } else {
+                        this.checked = false;
+                    }
+                } else {
+                    localStorage.setItem('site_maintenance_mode', 'false');
+                    showMessage('System Online. Buyers can access the site.', 'success');
+                }
+            });
+        }
+
+        // Get current admin user
+        const currentAdmin = auth.getCurrentUser();
+        const users = auth.getAllUsers();
+        
+        // Try to find in all users by ID (loose check) or Email
+        const adminUser = users.find(u => u.id == currentAdmin.id) || 
+                          users.find(u => u.email === currentAdmin.email) || 
+                          currentAdmin;
+
+        // Display email
+        const emailDisplay = document.querySelector('.profile-header p');
+        if (emailDisplay) {
+            emailDisplay.textContent = currentAdmin.email;
+        }
+
+        // Toggle password input fields
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggle = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+            
+            if (toggle && input) {
+                toggle.addEventListener('click', function() {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    
+                    if (type === 'text') {
+                        toggle.classList.remove('fa-eye');
+                        toggle.classList.add('fa-eye-slash');
+                    } else {
+                        toggle.classList.remove('fa-eye-slash');
+                        toggle.classList.add('fa-eye');
+                    }
+                });
+            }
+        }
+
+        setupPasswordToggle('toggleCurrentPassInput', 'currentPassword');
+        setupPasswordToggle('toggleNewPassInput', 'newPassword');
+        setupPasswordToggle('toggleConfirmPassInput', 'confirmPassword');
+
+        // Logout
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            auth.logout();
+            window.location.href = 'admin-login.html';
+        });
+
+        // Change password
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const currentPasswordInput = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Verify current password
+            // 1. Check specific admin password storage first (most reliable for admin login)
+            let actualCurrentPassword = localStorage.getItem('adminPassword');
+            
+            // 2. If not found, check user object
+            if (!actualCurrentPassword) {
+                if (adminUser && adminUser.password) {
+                    try {
+                        const decoded = atob(adminUser.password);
+                        if (!/[\x00-\x08\x0E-\x1F]/.test(decoded)) {
+                            actualCurrentPassword = decoded;
+                        } else {
+                            actualCurrentPassword = adminUser.password;
+                        }
+                    } catch (e) {
+                        actualCurrentPassword = adminUser.password;
+                    }
+                }
+            }
+
+            // 3. Fallback
+            if (!actualCurrentPassword) {
+                actualCurrentPassword = 'admin123';
+            }
+
+            if (currentPasswordInput !== actualCurrentPassword) {
+                showMessage('Incorrect current password', 'error');
+                return;
+            }
+
+            // Validate new passwords match
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match', 'error');
+                return;
+            }
+
+            // Validate new password with password strength checker
+            const validation = auth.validatePasswordStrength(newPassword);
+            if (!validation.isValid) {
+                showMessage(validation.errors[0], 'error');
+                return;
+            }
+
+            // CRITICAL: Update the specific admin password key used by admin-login.html
+            // This is the primary authentication source for admin
+            localStorage.setItem('adminPassword', newPassword);
+
+            // Update password in users array if exists
+            const users = auth.getAllUsers();
+            const userIndex = users.findIndex(u => u.id == currentAdmin.id || u.email === currentAdmin.email);
+            
+            const encodedPassword = btoa(newPassword);
+
+            if (userIndex !== -1) {
+                users[userIndex].password = encodedPassword; // Encode password
+                localStorage.setItem('booknest_users', JSON.stringify(users));
+            }
+
+            // Update current session user too
+            const sessionUser = auth.getCurrentUser();
+            if (sessionUser) {
+                sessionUser.password = encodedPassword;
+                localStorage.setItem('booknest_current_user', JSON.stringify(sessionUser));
+            }
+
+            showMessage('Password changed successfully!', 'success');
+
+            // Clear all fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        });
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function handleViewShop() {
+            // Keep admin session active when viewing shop
+            window.location.href = '../home.html';
+        }
+    </script>
+</body>
+</html>

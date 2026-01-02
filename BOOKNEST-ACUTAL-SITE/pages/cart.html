@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/firestore-backend.js"></script>
+    <script src="../js/user-notifications.js"></script>
+    
+    <script src="../js/modal.js"></script>
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .cart-page {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .cart-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #2F5D62;
+        }
+        .cart-header h1 {
+            font-size: 2rem;
+            color: #1f2937;
+            margin: 0;
+        }
+        .cart-empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .cart-empty i {
+            font-size: 5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        .cart-items {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .cart-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            align-items: center;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-item img {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .cart-item-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .cart-item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+        .cart-item-price {
+            color: #2F5D62;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .quantity-btn:hover {
+            background: #f3f4f6;
+            border-color: #2F5D62;
+        }
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .remove-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #ef4444;
+            background: #fef2f2;
+            color: #ef4444;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+            transition: all 0.2s;
+        }
+        .remove-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .cart-summary {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .cart-total-price {
+            color: #2F5D62;
+        }
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn-continue {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #2F5D62;
+            background: white;
+            color: #2F5D62;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-continue:hover {
+            background: #f3f4f6;
+        }
+        .btn-checkout {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(47, 93, 98, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .cart-page {
+                padding: 0 1rem;
+                margin-top: 80px;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .cart-item img {
+                width: 100px;
+                height: 150px;
+                align-self: center;
+            }
+
+            .cart-item-controls {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 0.5rem;
+            }
+
+            .cart-actions {
+                flex-direction: column;
+            }
+
+            .btn-continue, .btn-checkout {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <i class="fas fa-bars mobile-menu-btn" onclick="toggleMobileSidebar()"></i>
+            <div class="nav-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo">
+                <span>BookNest</span>
+            </div>
+            <div class="nav-links">
+                <a href="../home.html" class="nav-link">
+                    <i class="fas fa-store"></i> STORE
+                </a>
+                <a href="cart.html" class="nav-link active">
+                    <i class="fas fa-shopping-cart"></i> CART
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </a>
+                <a href="pile.html" class="nav-link">
+                    <i class="fas fa-layer-group"></i> PILE
+                </a>
+                <a href="orders.html" class="nav-link">
+                    <i class="fas fa-file-invoice"></i> ORDERS
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i> PROFILE
+                </a>
+                <a href="customer-service.html" class="nav-link">
+                    <i class="fas fa-headset"></i> SUPPORT
+                </a>
+                <a href="important-notice.html" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i> NOTICE
+                </a>
+            </div>
+
+            <!-- Navigation links moved to sidebar -->
+            <div class="nav-actions">
+                <div class="wishlist-icon" id="wishlistIcon" style="position: relative; margin-right: 15px; cursor: pointer;" onclick="openWishlistModal()">
+                    <i class="fas fa-heart" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="wishlistBadge" style="display: none;">0</span>
+                </div>
+                <div class="notification-bell" id="notificationBell" style="position: relative; margin-right: 15px; cursor: pointer;">
+                    <i class="fas fa-bell" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="userNotificationBadge" style="display: none;">0</span>
+                </div>
+                <button class="user-btn" id="userBtn" style="display: none;">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+                <span>BookNest</span>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="../home.html" class="sidebar-link">
+                <i class="fas fa-store"></i> STORE
+            </a>
+            <a href="cart.html" class="sidebar-link active">
+                <i class="fas fa-shopping-cart"></i> CART
+                <span class="cart-badge" id="cartBadge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">0</span>
+            </a>
+            <a href="pile.html" class="sidebar-link">
+                <i class="fas fa-layer-group"></i> PILE
+            </a>
+            <a href="orders.html" class="sidebar-link">
+                <i class="fas fa-receipt"></i> ORDERS AND INVOICES
+            </a>
+            <a href="profile.html" class="sidebar-link" id="profileSidebarLink" style="display: none;">
+                <i class="fas fa-user-circle"></i> MY PROFILE
+            </a>
+            <a href="my-tickets.html" class="sidebar-link" id="myTicketsSidebarLink" style="display: none;">
+                <i class="fas fa-ticket-alt"></i> MY TICKETS
+            </a>
+            <a href="customer-service.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> CUSTOMER SUPPORT
+                <span class="notification-badge" id="ticketNotificationBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
+            </a>
+            <a href="important-notice.html" class="sidebar-link" style="color: #f59e0b;">
+                <i class="fas fa-exclamation-triangle"></i> IMPORTANT NOTICE
+            </a>
+            <a href="login.html" class="sidebar-link" id="authLink" onclick="if(this.textContent.includes('Logout')) { event.preventDefault(); showLogoutConfirmation('login.html'); }">
+                <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="cart-page">
+            <div class="cart-header">
+                <i class="fas fa-shopping-cart" style="color: #2F5D62; font-size: 2rem;"></i>
+                <h1>Shopping Cart</h1>
+            </div>
+
+            <div id="cartContent">
+                <!-- Cart items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/books-data.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/ticket-notifications.js"></script>
+    <script src="../js/cart.js?v=5"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Wait for cart manager to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if logged in
+            if (!auth.isLoggedIn()) {
+                alert('Please login to view your cart');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update auth UI to show Logout and Profile
+            if (typeof updateAuthUI === 'function') {
+                updateAuthUI();
+            }
+
+            displayCart();
+            
+            // Ensure cart manager is initialized
+            if (typeof cartManager !== 'undefined') {
+                cartManager.updateCartBadge();
+            }
+        });
+
+        function displayCart() {
+            const cart = cartManager.getCart();
+            const cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="cart-empty">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h2 style="color: #64748b; margin-bottom: 0.5rem;">Your cart is empty</h2>
+                        <p style="color: #94a3b8; margin-bottom: 2rem;">Add some books to get started!</p>
+                        <button class="btn-checkout" onclick="window.location.href='../home.html'">
+                            <i class="fas fa-store"></i> Browse Books
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const cartItemsHTML = cart.map(item => `
+                <div class="cart-item">
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="cart-item-details">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">PHP ${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="remove-btn" onclick="removeItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            cartContent.innerHTML = `
+                <div class="cart-items">
+                    ${cartItemsHTML}
+                </div>
+                <div class="cart-summary">
+                    <div class="cart-total">
+                        <span>Total:</span>
+                        <span class="cart-total-price">PHP ${cartManager.getTotal().toFixed(2)}</span>
+                    </div>
+                    <div class="cart-actions">
+                        <button class="btn-continue" onclick="window.location.href='../home.html'">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </button>
+                        <button class="btn-checkout" onclick="handleCheckout()">
+                            <i class="fas fa-credit-card"></i> Proceed to Checkout
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQuantity(bookId, quantity) {
+            cartManager.updateQuantity(bookId, quantity);
+            displayCart();
+            cartManager.updateCartBadge();
+        }
+
+        function removeItem(bookId) {
+            if (confirm('Remove this item from cart?')) {
+                cartManager.removeFromCart(bookId);
+                displayCart();
+                cartManager.updateCartBadge();
+            }
+        }
+
+        async function handleCheckout() {
+            const cart = cartManager.getCart();
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            const currentUser = auth.getCurrentUser();
+            if (!currentUser) {
+                alert('Please login to place an order');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shippingFee = 0; // Shipping fee will be determined by admin
+            const total = subtotal + shippingFee;
+
+            // Create checkout form modal
+            const modal = document.createElement('div');
+            modal.id = 'checkoutFormModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 1rem;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0; color: #1f2937; font-size: 1.75rem;">
+                            <i class="fas fa-shipping-fast"></i> Checkout - Shipping Details
+                        </h2>
+                        <button onclick="closeCheckoutForm()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">×</button>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
+                        <p style="margin: 0; color: #1e40af; font-weight: 600;">
+                            <i class="fas fa-info-circle"></i> Choose your order type below
+                        </p>
+                    </div>
+
+                    <form id="checkoutFormCart">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: #374151; font-size: 1.1rem;">
+                                <i class="fas fa-box"></i> Order Type *
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="orderType" value="pile" id="orderTypePile" style="display: none;">
+                                    <div id="pileOption" style="padding: 1.5rem; border: 3px solid #e5e7eb; border-radius: 12px; text-align: center; transition: all 0.3s; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                                        <i class="fas fa-layer-group" style="font-size: 2.5rem; color: #10b981; margin-bottom: 0.75rem; display: block; filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));"></i>
+                                        <div style="font-weight: 700; color: #065f46; margin-bottom: 0.25rem; font-size: 1.05rem;">For Pile</div>
+                                        <div style="font-size: 0.85rem; color: #047857; font-weight: 500;">Save for later</div>
+                                    </div>
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="orderType" value="shipping" id="orderTypeShipping" style="display: none;">
+                                    <div id="shippingOption" style="padding: 1.5rem; border: 3px solid #e5e7eb; border-radius: 12px; text-align: center; transition: all 0.3s; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                                        <i class="fas fa-shipping-fast" style="font-size: 2.5rem; color: #3b82f6; margin-bottom: 0.75rem; display: block; filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));"></i>
+                                        <div style="font-weight: 700; color: #1e40af; margin-bottom: 0.25rem; font-size: 1.05rem;">For Shipping</div>
+                                        <div style="font-size: 0.85rem; color: #1e40af; font-weight: 500;">Deliver to address</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="orderTypeError" style="display: none; margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, #fee2e2, #fecaca); border: 3px solid #ef4444; border-radius: 12px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; color: #991b1b;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: #dc2626;"></i>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem;">⚠️ Order Type Required</div>
+                                        <div style="font-size: 0.9rem; font-weight: 500;">Please select either "For Pile" or "For Shipping" to continue</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="shippingFields" style="display: none;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">
+                                <i class="fas fa-user"></i> Full Name *
+                            </label>
+                            <input type="text" id="recipientName" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem;">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">
+                                <i class="fas fa-phone"></i> Phone Number *
+                            </label>
+                            <input type="tel" id="phoneNumber" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem;">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">
+                                <i class="fas fa-map-marker-alt"></i> Complete Shipping Address *
+                            </label>
+                            <textarea id="shippingAddress" rows="3" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                        </div>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #dc2626; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);">
+                            <p style="margin: 0 0 0.75rem 0; font-weight: 700; color: #991b1b; font-size: 1.05rem;">🚫 IMPORTANT ORDER POLICY</p>
+                            <ul style="margin: 0; padding-left: 1.25rem; color: #7f1d1d; font-size: 0.9rem; line-height: 1.7; font-weight: 500;">
+                                <li><strong style="color: #dc2626;">❌ NO CANCELLATION</strong> - Orders CANNOT be cancelled or changed by customers</li>
+                                <li>Orders can <strong>ONLY be cancelled by ADMIN</strong></li>
+                                <li>Payment must be made <strong>within 24 hours</strong></li>
+                                <li>Late payment fee: <strong>₱10 per day</strong></li>
+                                <li>"Joyjoy minor" offenders will be <strong>BANNED or posted on Facebook</strong></li>
+                            </ul>
+                        </div>
+
+                        <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="color: #6b7280;">Subtotal:</span>
+                                <span style="font-weight: 600;">PHP ${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="color: #6b7280;">Shipping Fee:</span>
+                                <span style="font-weight: 600; color: #f59e0b;">To be determined</span>
+                            </div>
+                            <div style="background: #eff6ff; padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; border-left: 3px solid #3b82f6;">
+                                <p style="margin: 0; font-size: 0.85rem; color: #1e40af; line-height: 1.5;">
+                                    <i class="fas fa-info-circle"></i> <strong>Shipping fee will be determined by admin.</strong><br>
+                                    An admin will contact you via <strong>Facebook, phone number, or email</strong> to confirm the shipping cost.
+                                </p>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 2px solid #d1d5db;">
+                                <span style="font-weight: 700; font-size: 1.25rem;">Total:</span>
+                                <span style="font-weight: 700; font-size: 1.25rem; color: #2F5D62;">PHP ${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" onclick="closeCheckoutForm()" style="flex: 1; padding: 1rem; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button type="submit" id="placeOrderButton" style="flex: 1; padding: 1rem; background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                <i class="fas fa-check-circle"></i> Place Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            // Handle order type selection
+            const pileOption = document.getElementById('pileOption');
+            const shippingOption = document.getElementById('shippingOption');
+            const orderTypePile = document.getElementById('orderTypePile');
+            const orderTypeShipping = document.getElementById('orderTypeShipping');
+            const shippingFields = document.getElementById('shippingFields');
+
+            pileOption.addEventListener('click', function() {
+                orderTypePile.checked = true;
+                pileOption.style.border = '3px solid #10b981';
+                pileOption.style.background = 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)';
+                pileOption.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
+                pileOption.style.transform = 'scale(1.02)';
+                shippingOption.style.border = '3px solid #e5e7eb';
+                shippingOption.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
+                shippingOption.style.boxShadow = 'none';
+                shippingOption.style.transform = 'scale(1)';
+                shippingFields.style.display = 'none';
+                // Hide error message
+                document.getElementById('orderTypeError').style.display = 'none';
+                // Make shipping fields not required
+                document.getElementById('recipientName').required = false;
+                document.getElementById('phoneNumber').required = false;
+                document.getElementById('shippingAddress').required = false;
+            });
+
+            shippingOption.addEventListener('click', function() {
+                orderTypeShipping.checked = true;
+                shippingOption.style.border = '3px solid #3b82f6';
+                shippingOption.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
+                shippingOption.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
+                shippingOption.style.transform = 'scale(1.02)';
+                pileOption.style.border = '3px solid #e5e7eb';
+                pileOption.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
+                pileOption.style.boxShadow = 'none';
+                pileOption.style.transform = 'scale(1)';
+                shippingFields.style.display = 'block';
+                // Hide error message
+                document.getElementById('orderTypeError').style.display = 'none';
+                // Make shipping fields required
+                document.getElementById('recipientName').required = true;
+                document.getElementById('phoneNumber').required = true;
+                document.getElementById('shippingAddress').required = true;
+            });
+
+            // Auto-fill with user's profile information
+            document.getElementById('recipientName').value = currentUser.name || '';
+            document.getElementById('phoneNumber').value = currentUser.phone || '';
+            document.getElementById('shippingAddress').value = currentUser.address || '';
+
+            // Handle form submission
+            const checkoutForm = document.getElementById('checkoutFormCart');
+            checkoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validate order type first
+                const orderType = document.querySelector('input[name="orderType"]:checked');
+                if (!orderType) {
+                    // Show custom styled alert
+                    const alertModal = document.createElement('div');
+                    alertModal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.85);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 20000;
+                        animation: fadeIn 0.2s ease-in;
+                    `;
+                    
+                    alertModal.innerHTML = `
+                        <div style="background: white; border-radius: 20px; max-width: 450px; width: 90%; box-shadow: 0 25px 80px rgba(0,0,0,0.5); animation: bounceIn 0.4s ease-out; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 2rem; text-align: center; position: relative;">
+                                <div style="width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #f59e0b; animation: pulse 1s infinite;"></i>
+                                </div>
+                                <h2 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">SELECT ORDER TYPE</h2>
+                            </div>
+                            
+                            <div style="padding: 2rem;">
+                                <p style="margin: 0 0 1.5rem 0; color: #1f2937; font-size: 1.05rem; text-align: center; font-weight: 500;">Choose how you want to receive your books:</p>
+                                
+                                <div style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid #10b981;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <i class="fas fa-layer-group" style="font-size: 2rem; color: #10b981;"></i>
+                                        <div>
+                                            <div style="font-weight: 700; color: #065f46; font-size: 1.1rem; margin-bottom: 0.25rem;">📚 For Pile</div>
+                                            <div style="color: #047857; font-size: 0.9rem;">Save for later pickup at our location</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <i class="fas fa-shipping-fast" style="font-size: 2rem; color: #3b82f6;"></i>
+                                        <div>
+                                            <div style="font-weight: 700; color: #1e40af; font-size: 1.1rem; margin-bottom: 0.25rem;">📦 For Shipping</div>
+                                            <div style="color: #1e40af; font-size: 0.9rem;">Deliver to your address</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 1rem; border-radius: 10px; border: 2px solid #ef4444; text-align: center; margin-bottom: 1.5rem;">
+                                    <p style="margin: 0; color: #991b1b; font-weight: 700; font-size: 0.95rem;">
+                                        <i class="fas fa-times-circle"></i> You must select one option to continue
+                                    </p>
+                                </div>
+                                
+                                <button onclick="this.closest('[style*=fixed]').remove()" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.4)'">
+                                    <i class="fas fa-check-circle"></i> OK, I'll Choose Now
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(alertModal);
+                    
+                    // Show error message
+                    const errorDiv = document.getElementById('orderTypeError');
+                    if (errorDiv) {
+                        errorDiv.style.display = 'block';
+                    }
+                    
+                    // Scroll to order type section and highlight it
+                    const firstOrderTypeInput = document.querySelector('input[name="orderType"]');
+                    if (firstOrderTypeInput) {
+                        const orderTypeSection = firstOrderTypeInput.closest('div').parentElement;
+                        orderTypeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    
+                    // Highlight both options with animation
+                    const pileOption = document.getElementById('pileOption');
+                    const shippingOption = document.getElementById('shippingOption');
+                    
+                    if (pileOption && shippingOption) {
+                        pileOption.style.border = '3px solid #ef4444';
+                        shippingOption.style.border = '3px solid #ef4444';
+                        pileOption.style.animation = 'shake 0.5s';
+                        shippingOption.style.animation = 'shake 0.5s';
+                        pileOption.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+                        shippingOption.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+                        
+                        setTimeout(() => {
+                            pileOption.style.animation = '';
+                            shippingOption.style.animation = '';
+                            pileOption.style.border = '2px solid #ef4444';
+                            shippingOption.style.border = '2px solid #ef4444';
+                        }, 500);
+                        
+                        setTimeout(() => {
+                            pileOption.style.border = '2px solid #e5e7eb';
+                            shippingOption.style.border = '2px solid #e5e7eb';
+                            pileOption.style.boxShadow = '';
+                            shippingOption.style.boxShadow = '';
+                        }, 3000);
+                    }
+                    
+                    return;
+                }
+                
+                // Hide error message if order type is selected
+                document.getElementById('orderTypeError').style.display = 'none';
+
+                // Validate shipping fields if shipping is selected
+                if (orderType.value === 'shipping') {
+                    const recipientName = document.getElementById('recipientName').value.trim();
+                    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+                    const shippingAddress = document.getElementById('shippingAddress').value.trim();
+                    
+                    if (!recipientName) {
+                        document.getElementById('recipientName').focus();
+                        document.getElementById('recipientName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        document.getElementById('recipientName').style.border = '2px solid #ef4444';
+                        alert('⚠️ Please enter your full name');
+                        setTimeout(() => document.getElementById('recipientName').style.border = '', 2000);
+                        return;
+                    }
+                    
+                    if (!phoneNumber) {
+                        document.getElementById('phoneNumber').focus();
+                        document.getElementById('phoneNumber').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        document.getElementById('phoneNumber').style.border = '2px solid #ef4444';
+                        alert('⚠️ Please enter your phone number');
+                        setTimeout(() => document.getElementById('phoneNumber').style.border = '', 2000);
+                        return;
+                    }
+                    
+                    if (!shippingAddress) {
+                        document.getElementById('shippingAddress').focus();
+                        document.getElementById('shippingAddress').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        document.getElementById('shippingAddress').style.border = '2px solid #ef4444';
+                        alert('⚠️ Please enter your complete shipping address');
+                        setTimeout(() => document.getElementById('shippingAddress').style.border = '', 2000);
+                        return;
+                    }
+                }
+
+                // Show custom confirmation dialog
+                showConfirmationDialog(orderType.value).then((confirmed) => {
+                    if (!confirmed) {
+                        return; // User clicked "Cancel"
+                    }
+
+                    try {
+                        // Prepare order data
+                    const newOrder = {
+                        id: Date.now(),
+                        userId: currentUser.id,
+                        customerEmail: currentUser.email,
+                        items: cart,
+                        subtotal: subtotal,
+                        shippingFee: shippingFee,
+                        total: total,
+                        orderDate: new Date().toISOString(),
+                        status: 'pending',
+                        orderType: orderType.value
+                    };
+
+                    // Add customer info
+                    if (orderType.value === 'shipping') {
+                        const name = document.getElementById('recipientName').value.trim();
+                        const phone = document.getElementById('phoneNumber').value.trim();
+                        const address = document.getElementById('shippingAddress').value.trim();
+                        
+                        newOrder.name = name;
+                        newOrder.phone = phone;
+                        newOrder.address = address;
+                        
+                        newOrder.customerInfo = {
+                            name: name,
+                            phone: phone,
+                            address: address,
+                            email: currentUser.email
+                        };
+                    } else {
+                        // For pile orders, just store basic customer info
+                        newOrder.customerInfo = {
+                            name: currentUser.name,
+                            email: currentUser.email
+                        };
+                    }
+
+                    // Save to appropriate storage
+                    if (orderType.value === 'pile') {
+                        // Pile orders go to pile storage
+                        const pileItems = JSON.parse(localStorage.getItem('pile') || '[]');
+                        
+                        // Add each book to pile with order info
+                        cart.forEach(item => {
+                            pileItems.push({
+                                id: Date.now() + Math.random(), // Unique ID for pile item
+                                bookId: item.id,
+                                title: item.title,
+                                author: item.author,
+                                format: item.format || 'Hardcover',
+                                price: item.price,
+                                image: item.image,
+                                quantity: item.quantity,
+                                addedAt: new Date().toISOString(),
+                                userId: currentUser.id,
+                                orderId: newOrder.id,
+                                status: 'pending'
+                            });
+                        });
+                        
+                        try {
+                            localStorage.setItem('pile', JSON.stringify(pileItems));
+                            
+                            // Also save the order metadata to orders array for pile tracking
+                            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                            orders.push(newOrder);
+                            localStorage.setItem('orders', JSON.stringify(orders));
+                        } catch (e) {
+                            if (e.name === 'QuotaExceededError') {
+                                // Auto-cleanup: Remove old completed/cancelled pile items
+                                const cleanedPile = pileItems.filter(item => {
+                                    const age = Date.now() - new Date(item.addedAt).getTime();
+                                    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+                                    return item.status === 'pending' || age < maxAge;
+                                });
+                                
+                                // Also clean old orders
+                                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                                const cleanedOrders = orders.filter(o => {
+                                    const age = Date.now() - new Date(o.orderDate).getTime();
+                                    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+                                    return o.status === 'pending' || o.status === 'confirmed' || age < maxAge;
+                                });
+                                
+                                // Try saving again after cleanup
+                                try {
+                                    localStorage.setItem('pile', JSON.stringify(cleanedPile));
+                                    localStorage.setItem('orders', JSON.stringify(cleanedOrders));
+                                    
+                                    // Add new order
+                                    cleanedOrders.push(newOrder);
+                                    localStorage.setItem('orders', JSON.stringify(cleanedOrders));
+                                    
+                                    console.log('✅ Auto-cleanup successful. Old data cleared.');
+                                } catch (e2) {
+                                    alert('❌ Storage still full after cleanup!\n\nPlease clear browser data:\n1. Press F12\n2. Go to Application tab\n3. Clear localStorage\n\nOr contact admin for help.');
+                                    closeCheckoutForm();
+                                    return;
+                                }
+                            } else {
+                                throw e;
+                            }
+                        }
+                    } else {
+                        // Shipping orders go to orders storage
+                        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                        orders.push(newOrder);
+                        
+                        try {
+                            localStorage.setItem('orders', JSON.stringify(orders));
+                        } catch (e) {
+                            if (e.name === 'QuotaExceededError') {
+                                // Auto-cleanup: Remove old completed/cancelled orders
+                                const cleanedOrders = orders.filter(o => {
+                                    const age = Date.now() - new Date(o.orderDate).getTime();
+                                    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+                                    return o.status === 'pending' || o.status === 'confirmed' || age < maxAge;
+                                });
+                                
+                                // Try saving again after cleanup
+                                try {
+                                    localStorage.setItem('orders', JSON.stringify(cleanedOrders));
+                                    console.log('✅ Auto-cleanup successful. Old orders cleared.');
+                                } catch (e2) {
+                                    alert('❌ Storage still full after cleanup!\n\nPlease clear browser data:\n1. Press F12\n2. Go to Application tab\n3. Clear localStorage\n\nOr contact admin for help.');
+                                    closeCheckoutForm();
+                                    return;
+                                }
+                            } else {
+                                throw e;
+                            }
+                        }
+                    }
+
+                    // Reduce stock for ordered items
+                    const booksData = JSON.parse(localStorage.getItem('booksData') || '[]');
+                    cart.forEach(cartItem => {
+                    const book = booksData.find(b => b.id === cartItem.id);
+                    if (book) {
+                        book.stock = Math.max(0, book.stock - cartItem.quantity);
+                    }
+                });
+                    localStorage.setItem('booksData', JSON.stringify(booksData));
+
+                    // Clear cart
+                    cartManager.clearCart();
+
+                    // Redirect based on order type
+                    if (orderType.value === 'pile') {
+                        window.location.href = 'pile.html'; // Pile orders go to pile page
+                    } else {
+                        window.location.href = 'orders.html'; // Shipping orders go to orders page
+                    }
+                } catch (error) {
+                    console.error('Order placement error:', error);
+                    alert('❌ An error occurred while placing your order. Please try again or contact support.');
+                }
+                });
+            });
+        }
+
+        function showConfirmationDialog(orderType) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.75);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10001;
+                    padding: 1rem;
+                    animation: fadeIn 0.2s ease-in;
+                `;
+
+                const shippingInfo = orderType === 'shipping' 
+                    ? '<li style="color: #1e40af;"><i class="fas fa-truck" style="color: #3b82f6;"></i> <strong>Shipping fee: To be determined by admin</strong></li>'
+                    : '';
+
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: scaleIn 0.3s ease-out;">
+                        <div style="background: linear-gradient(135deg, #dc2626, #991b1b); padding: 1.5rem; border-radius: 16px 16px 0 0; text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #dc2626;"></i>
+                            </div>
+                            <h2 style="margin: 0; color: white; font-size: 1.5rem; font-weight: 700;">IMPORTANT NOTICE</h2>
+                        </div>
+                        
+                        <div style="padding: 2rem;">
+                            <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #dc2626; margin-bottom: 1.5rem;">
+                                <h3 style="margin: 0 0 1rem 0; color: #991b1b; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-ban"></i> NO CANCELLATION POLICY
+                                </h3>
+                                <ul style="margin: 0; padding-left: 1.5rem; color: #7f1d1d; line-height: 2; font-weight: 500;">
+                                    <li>Orders <strong style="color: #dc2626;">CANNOT</strong> be cancelled or changed by customers</li>
+                                    <li>Only <strong>ADMIN</strong> can cancel orders</li>
+                                    ${shippingInfo}
+                                    <li><i class="fas fa-clock" style="color: #f59e0b;"></i> Payment due within <strong>24 hours</strong></li>
+                                    <li><i class="fas fa-money-bill-wave" style="color: #10b981;"></i> Late payment fee: <strong>₱10 per day</strong></li>
+                                    <li><i class="fas fa-user-slash" style="color: #ef4444;"></i> "Joyjoy minor" offenders will be <strong>BANNED</strong></li>
+                                </ul>
+                            </div>
+                            
+                            <p style="text-align: center; color: #374151; font-size: 1.05rem; margin-bottom: 1.5rem; font-weight: 600;">
+                                Do you understand and agree to place this order?
+                            </p>
+                            
+                            <div style="display: flex; gap: 1rem;">
+                                <button id="cancelBtn" style="flex: 1; padding: 0.875rem 1.5rem; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.2s;">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                                <button id="confirmBtn" style="flex: 1; padding: 0.875rem 1.5rem; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                                    <i class="fas fa-check-circle"></i> I Understand, Place Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                const cancelBtn = modal.querySelector('#cancelBtn');
+                const confirmBtn = modal.querySelector('#confirmBtn');
+
+                cancelBtn.addEventListener('mouseenter', () => {
+                    cancelBtn.style.background = '#d1d5db';
+                });
+                cancelBtn.addEventListener('mouseleave', () => {
+                    cancelBtn.style.background = '#e5e7eb';
+                });
+
+                confirmBtn.addEventListener('mouseenter', () => {
+                    confirmBtn.style.transform = 'translateY(-2px)';
+                    confirmBtn.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+                });
+                confirmBtn.addEventListener('mouseleave', () => {
+                    confirmBtn.style.transform = 'translateY(0)';
+                    confirmBtn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                });
+
+                cancelBtn.addEventListener('click', () => {
+                    modal.remove();
+                    resolve(false);
+                });
+
+                confirmBtn.addEventListener('click', () => {
+                    modal.remove();
+                    resolve(true);
+                });
+            });
+        }
+
+        function closeCheckoutForm() {
+            const modal = document.getElementById('checkoutFormModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+    </script>
+    <script src="../js/storage-manager.js"></script>
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+</body>
+</html>

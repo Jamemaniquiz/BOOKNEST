@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo" id="secretAdminLogo" style="cursor:pointer;">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 60px; width: auto; border-radius: 50%; margin-bottom: 10px;">
+                <h1>BookNest</h1>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Sign Up</button>
+            </div>
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2>Welcome Back!</h2>
+                            <p class="auth-subtitle">Please enter your credentials</p>
+                            <div class="form-group">
+                                <label for="loginEmail">Gmail Address</label>
+                                <input type="email" id="loginEmail" class="form-input" placeholder="yourname@gmail.com" required>
+                                <small class="input-hint">Only Gmail addresses (@gmail.com) are accepted</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password</label>
+                                <div style="position: relative;">
+                                    <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required style="padding-right: 45px;">
+                                    <i class="fas fa-eye" id="toggleLoginPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                                </div>
+                                <div style="text-align: right; margin-top: 0.5rem;">
+                                    <a href="#" id="forgotPasswordLink" style="color: #667eea; font-size: 0.875rem; text-decoration: none; font-weight: 500;">
+                                        <i class="fas fa-key"></i> Forgot Password?
+                                    </a>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit" id="loginBtn">
+                                LOGIN
+                            </button>
+                            <div id="googleLoginButtonDiv" style="display: flex; justify-content: center;"></div>
+                        </form>
+                        <!-- Register Form -->
+                        <form id="registerForm" class="auth-form">
+                            <h2>Create Account</h2>
+                            <p class="auth-subtitle">Join BookNest today with your Gmail</p>
+                            
+                                <div class="form-group">
+                                    <label for="registerName">Full Name</label>
+                                    <input type="text" id="registerName" class="form-input" placeholder="Enter your full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerPhone">Phone Number</label>
+                                    <input type="tel" id="registerPhone" class="form-input" placeholder="+63 XXX XXX XXXX" required>
+                                    <small class="input-hint">Your phone number for order updates and customer support</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerEmail">Gmail Address</label>
+                                    <input type="email" id="registerEmail" class="form-input" placeholder="yourname@gmail.com" required>
+                                    <small class="input-hint">Only Gmail addresses (@gmail.com) are accepted</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerPassword">Password</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="registerPassword" class="form-input" placeholder="Create a strong password (min 8 characters)" required minlength="8" style="padding-right: 45px;">
+                                        <i class="fas fa-eye" id="toggleRegisterPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                                    </div>
+                                    <small class="input-hint">Use 8+ characters with uppercase, lowercase, numbers, and symbols</small>
+                                    
+                                    <!-- Password Strength Indicator -->
+                                    <div id="passwordStrength" class="password-strength-indicator" style="display: none;">
+                                        <div class="strength-bar weak"></div>
+                                        <p class="strength-text">Password Strength: Weak</p>
+                                    </div>
+                                    
+                                    <!-- Password Requirements List -->
+                                    <ul id="passwordRequirements" class="password-requirements">
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> At least 8 characters</li>
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> One uppercase letter (A-Z)</li>
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> One lowercase letter (a-z)</li>
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> One number (0-9)</li>
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> One special character (!@#$%^&*)</li>
+                                        <li class="unmet"><i class="fas fa-times-circle"></i> No sequential characters (abc, 123)</li>
+                                    </ul>
+                                </div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="agreeTerms" required>
+                                    <label for="agreeTerms">I agree to the <a href="#" id="showTermsLink" style="color: #667eea; text-decoration: none; font-weight: 600;">terms and conditions</a> <span class="required-mark">*</span></label>
+                                </div>
+                                <button type="submit" class="btn-submit" id="registerBtn" disabled>
+                                    SIGN UP
+                                </button>
+                                <div id="googleRegisterButtonDiv" style="display: flex; justify-content: center;"></div>
+                        </form>
+            </form>
+            
+            <div class="auth-footer">
+                <!-- Back to Shop link removed -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Forgot Password</h2>
+                <button class="close-btn" onclick="closeForgotPasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="resetStep1" class="reset-step">
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+                        <p style="margin: 0; color: #1565C0; font-weight: 500;"><i class="fab fa-facebook"></i> Password Recovery Process</p>
+                        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.875rem;">For security reasons, our admin will contact you via Facebook to help you recover your password.</p>
+                    </div>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Enter your account details and Facebook profile link</p>
+                    <div class="form-group">
+                        <label for="resetEmail"><i class="fas fa-envelope"></i> Gmail Address</label>
+                        <input type="email" id="resetEmail" class="form-input" placeholder="yourname@gmail.com" required>
+                        <small class="input-hint">The Gmail address you used to register</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="facebookLink"><i class="fab fa-facebook"></i> Facebook Profile Link <span class="required-mark">*</span></label>
+                        <input type="url" id="facebookLink" class="form-input" placeholder="https://facebook.com/yourprofile" required>
+                        <small class="input-hint">Admin will contact you here to verify your identity and send your new password</small>
+                    </div>
+                    <div style="background: #fff3cd; border-left: 4px solid #f59e0b; padding: 0.75rem; margin: 1rem 0; border-radius: 4px;">
+                        <p style="margin: 0; color: #856404; font-size: 0.875rem;"><strong>⚠️ Important:</strong> Make sure your Facebook profile is accessible so our admin can reach you.</p>
+                    </div>
+                    <button class="btn-submit" onclick="submitPasswordRecovery()" style="width: 100%;">
+                        <i class="fab fa-facebook-messenger"></i> Request Password Recovery
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div class="modal" id="termsModal">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms and Conditions</h2>
+                <button class="close-btn" onclick="closeTermsModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: left; padding: 2rem;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">BookNest Terms and Conditions</h3>
+                <p style="color: #666; margin-bottom: 1.5rem;"><strong>Effective Date:</strong> December 31, 2025</p>
+                
+                <div style="line-height: 1.8; color: #333;">
+                    <p style="margin-bottom: 1.5rem;">Welcome to BookNest. By accessing or using our services, you agree to be bound by these Terms and Conditions. Please read them carefully before creating an account.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">1. Acceptance of Terms</h4>
+                    <p>• By registering for an account, you acknowledge that you have read, understood, and agree to these Terms and Conditions.</p>
+                    <p>• If you do not agree with any part of these terms, you must not use our services.</p>
+                    <p>• You must be at least 18 years old to create an account and place orders.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">2. Account Registration and Security</h4>
+                    <p>• You must provide accurate, current, and complete information during registration.</p>
+                    <p>• Only Gmail addresses (@gmail.com) are accepted for registration.</p>
+                    <p>• You are solely responsible for maintaining the confidentiality of your account credentials.</p>
+                    <p>• You agree to notify us immediately of any unauthorized use of your account.</p>
+                    <p>• You are responsible for all activities that occur under your account.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">3. Orders and Payment Terms</h4>
+                    <p>• <strong>NO CANCELLATION POLICY:</strong> All orders are final and binding. Once an order is placed, it cannot be cancelled, modified, or refunded under any circumstances.</p>
+                    <p>• Payment must be completed within 24 hours of placing your order.</p>
+                    <p>• Late payments will incur a ₱10 per day late fee starting from the 25th hour after order placement.</p>
+                    <p>• Failure to complete payment within the deadline may result in automatic order forfeiture and potential account restrictions.</p>
+                    <p>• Prices are subject to change without prior notice. The price at the time of order placement is the binding price.</p>
+                    <p>• We reserve the right to refuse service to anyone for any reason at any time.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">4. Book Conditions and Descriptions</h4>
+                    <p>• <strong>Brand New:</strong> Books in pristine, unread condition with no damage or marks.</p>
+                    <p>• <strong>Pre-Loved:</strong> Previously owned books in excellent readable condition with minor wear.</p>
+                    <p>• <strong>Remaindered:</strong> New books that may have publisher's marks or minor cosmetic imperfections but are otherwise unread.</p>
+                    <p>• All books are described to the best of our ability. By placing an order, you accept the condition as described.</p>
+                    <p>• We are not liable for minor discrepancies in condition that do not affect readability.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">5. Shipping and Delivery</h4>
+                    <p>• Shipping fees will be communicated by admin via Facebook, email, or contact number before delivery.</p>
+                    <p>• Shipping is available only on Saturday, Sunday, and Monday.</p>
+                    <p>• Delivery times vary by location and are estimates only, not guarantees.</p>
+                    <p>• We are not responsible for delays, loss, or damage caused by the courier service.</p>
+                    <p>• Risk of loss and title for items pass to you upon delivery to the courier.</p>
+                    <p>• You must provide accurate and complete delivery information. We are not responsible for failed deliveries due to incorrect addresses.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">6. Piling (Storage) Option</h4>
+                    <p>• Free storage is provided for up to 30 calendar days from order placement.</p>
+                    <p>• Books not claimed within 30 days will be permanently forfeited without refund or compensation.</p>
+                    <p>• You will receive notifications via email and/or SMS before the deadline.</p>
+                    <p>• BookNest is not responsible for notification delivery failures due to incorrect contact information.</p>
+                    <p>• Storage fees may apply after the grace period at BookNest's discretion.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">7. Returns, Refunds, and Damages</h4>
+                    <p>• <strong>NO RETURNS OR REFUNDS:</strong> Due to our NO CANCELLATION policy, we do not accept returns or provide refunds for any reason, including buyer's remorse or change of mind.</p>
+                    <p>• <strong>Damaged Books:</strong> Damage claims must be reported within 24 hours of delivery with clear photographic evidence.</p>
+                    <p>• Damage claims are evaluated on a case-by-case basis. We reserve the right to accept or deny any claim.</p>
+                    <p>• Approved damage claims may result in replacement or partial refund at our sole discretion.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">8. Privacy and Data Protection</h4>
+                    <p>• Your personal information (name, email, phone, address) is collected for order processing and communication purposes only.</p>
+                    <p>• We implement reasonable security measures to protect your data from unauthorized access.</p>
+                    <p>• We will not sell, rent, or share your information with third parties without your explicit consent, except as required by law.</p>
+                    <p>• By using our services, you consent to the collection and use of your information as described.</p>
+                    <p>• You have the right to request access to or deletion of your personal data by contacting us.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">9. Prohibited Activities</h4>
+                    <p>You agree NOT to:</p>
+                    <p>• Create multiple accounts to manipulate orders, pricing, or availability.</p>
+                    <p>• Provide false, misleading, or fraudulent information during registration or checkout.</p>
+                    <p>• Attempt to gain unauthorized access to our systems or exploit vulnerabilities.</p>
+                    <p>• Use the platform for any illegal or unauthorized purpose.</p>
+                    <p>• Harass, abuse, or harm other users or BookNest staff.</p>
+                    <p>• Resell books purchased from BookNest without authorization.</p>
+                    <p>• Violation of these terms may result in account suspension or termination without refund.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">10. Intellectual Property</h4>
+                    <p>• All content on BookNest, including text, graphics, logos, and software, is the property of BookNest or its licensors.</p>
+                    <p>• You may not reproduce, distribute, or create derivative works without written permission.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">11. Limitation of Liability</h4>
+                    <p>• BookNest is provided "as is" without warranties of any kind, express or implied.</p>
+                    <p>• We are not liable for any indirect, incidental, special, or consequential damages arising from your use of the service.</p>
+                    <p>• Our total liability for any claim shall not exceed the amount paid by you for the specific order in question.</p>
+                    <p>• We do not guarantee uninterrupted or error-free service.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">12. Dispute Resolution</h4>
+                    <p>• Any disputes arising from these terms shall be resolved through good faith negotiation.</p>
+                    <p>• If negotiation fails, disputes shall be resolved through binding arbitration in accordance with Philippine law.</p>
+                    <p>• You waive any right to participate in class action lawsuits or class-wide arbitration.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">13. Modifications to Terms</h4>
+                    <p>• BookNest reserves the right to modify, update, or change these Terms and Conditions at any time without prior notice.</p>
+                    <p>• Modifications become effective immediately upon posting to the website.</p>
+                    <p>• Continued use of the service after modifications constitutes your acceptance of the revised terms.</p>
+                    <p>• It is your responsibility to review these terms periodically for changes.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">14. Account Termination</h4>
+                    <p>• We reserve the right to suspend or terminate your account at any time for violation of these terms.</p>
+                    <p>• Upon termination, you lose access to your account and any pending orders may be cancelled without refund.</p>
+                    <p>• You may request account deletion at any time, but this does not affect existing orders.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">15. Governing Law</h4>
+                    <p>• These Terms and Conditions are governed by and construed in accordance with the laws of the Republic of the Philippines.</p>
+                    <p>• Any legal action or proceeding shall be brought exclusively in courts located in the Philippines.</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">16. Contact Information</h4>
+                    <p>• For questions, concerns, or support regarding these terms or our services, please contact us through:</p>
+                    <p>&nbsp;&nbsp;- Email: As provided in your account communications</p>
+                    <p>&nbsp;&nbsp;- Facebook: As provided during password recovery</p>
+                    <p>&nbsp;&nbsp;- Phone: As provided in order confirmations</p>
+                    
+                    <h4 style="color: #333; margin-top: 1.5rem; margin-bottom: 0.5rem;">17. Severability</h4>
+                    <p>• If any provision of these terms is found to be unenforceable or invalid, that provision shall be limited or eliminated to the minimum extent necessary.</p>
+                    <p>• The remainder of these terms shall remain in full force and effect.</p>
+                    
+                    <div style="background: #fff3cd; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1.5rem 0;">
+                        <p style="margin: 0; color: #856404;"><strong>⚠️ IMPORTANT ACKNOWLEDGMENT:</strong> By checking the "I agree" box and creating an account, you explicitly acknowledge that you have:</p>
+                        <p style="margin: 0.5rem 0 0 0; color: #856404;">1. Read and understood these Terms and Conditions in their entirety<br>
+                        2. Agreed to be legally bound by these terms<br>
+                        3. Accepted the NO CANCELLATION and NO REFUND policies<br>
+                        4. Confirmed you are at least 18 years of age</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn-submit" onclick="acceptTermsAndClose()" style="padding: 0.75rem 2rem;">
+                        <i class="fas fa-check"></i> I Understand and Accept
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/login-simple.js"></script>
+</body>
+</html>

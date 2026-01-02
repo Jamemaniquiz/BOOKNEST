@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
+    <style>
+        .profile-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(47, 93, 98, 0.3);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar i {
+            font-size: 4rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card h2 {
+            margin: 0 0 1.5rem 0;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .profile-card h2 i {
+            color: #2F5D62;
+        }
+
+        .profile-info {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #2F5D62;
+        }
+
+        .info-row i {
+            font-size: 1.5rem;
+            color: #2F5D62;
+            width: 30px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.05rem;
+        }
+
+        .edit-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group label i {
+            color: #2F5D62;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2F5D62;
+            box-shadow: 0 0 0 3px rgba(47, 93, 98, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(47, 93, 98, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .btn-danger {
+            background: white;
+            color: #dc2626;
+            border: 2px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+
+        #viewMode, #editMode {
+            display: none;
+        }
+
+        #viewMode.active, #editMode.active {
+            display: block;
+        }
+
+        .google-auth-notice {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .google-auth-notice i {
+            color: #059669;
+            font-size: 1.5rem;
+        }
+
+        .google-auth-notice p {
+            margin: 0;
+            color: #065f46;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+                margin-top: 80px;
+            }
+
+            .profile-header {
+                padding: 2rem 1rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .info-row i {
+                width: auto;
+                margin-bottom: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <i class="fas fa-bars mobile-menu-btn" onclick="toggleMobileSidebar()"></i>
+            <div class="nav-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo">
+                <span>BookNest</span>
+            </div>
+            <div class="nav-links">
+                <a href="../home.html" class="nav-link">
+                    <i class="fas fa-store"></i> STORE
+                </a>
+                <a href="cart.html" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> CART
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </a>
+                <a href="pile.html" class="nav-link">
+                    <i class="fas fa-layer-group"></i> PILE
+                </a>
+                <a href="orders.html" class="nav-link">
+                    <i class="fas fa-file-invoice"></i> ORDERS
+                </a>
+                <a href="profile.html" class="nav-link active">
+                    <i class="fas fa-user"></i> PROFILE
+                </a>
+                <a href="customer-service.html" class="nav-link">
+                    <i class="fas fa-headset"></i> SUPPORT
+                </a>
+                <a href="important-notice.html" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i> NOTICE
+                </a>
+            </div>
+
+            <!-- Navigation links moved to sidebar -->
+            <div class="nav-actions">
+                <div class="notification-bell" id="notificationBell" style="position: relative; margin-right: 15px; cursor: pointer;">
+                    <i class="fas fa-bell" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="userNotificationBadge" style="display: none;">0</span>
+                </div>
+                <button class="user-btn" id="userBtn" style="display: none;">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+                <span>BookNest</span>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="../home.html" class="sidebar-link">
+                <i class="fas fa-store"></i> STORE
+            </a>
+            <a href="cart.html" class="sidebar-link">
+                <i class="fas fa-shopping-cart"></i> CART
+                <span class="cart-badge" id="cartBadge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">0</span>
+            </a>
+            <a href="pile.html" class="sidebar-link">
+                <i class="fas fa-layer-group"></i> PILE
+            </a>
+            <a href="orders.html" class="sidebar-link">
+                <i class="fas fa-receipt"></i> ORDERS AND INVOICES
+            </a>
+            <a href="profile.html" class="sidebar-link active" id="profileSidebarLink" style="display: none;">
+                <i class="fas fa-user-circle"></i> MY PROFILE
+            </a>
+            <a href="my-tickets.html" class="sidebar-link" id="myTicketsSidebarLink" style="display: none;">
+                <i class="fas fa-ticket-alt"></i> MY TICKETS
+            </a>
+            <a href="customer-service.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> CUSTOMER SUPPORT
+                <span class="notification-badge" id="ticketNotificationBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
+            </a>
+            <a href="important-notice.html" class="sidebar-link" style="color: #f59e0b;">
+                <i class="fas fa-exclamation-triangle"></i> IMPORTANT NOTICE
+            </a>
+            <a href="login.html" class="sidebar-link" id="authLink" onclick="if(this.textContent.includes('Logout')) { event.preventDefault(); showLogoutConfirmation('login.html'); }">
+                <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h1 id="headerName" style="margin: 0 0 0.5rem 0; font-size: 2rem;">Loading...</h1>
+                <p id="headerEmail" style="margin: 0; opacity: 0.9; font-size: 1.1rem;">Loading...</p>
+            </div>
+
+            <!-- View Mode -->
+            <div id="viewMode">
+                <div class="profile-card">
+                    <h2><i class="fas fa-user"></i> Personal Information</h2>
+                    <div class="profile-info">
+                        <div class="info-row">
+                            <i class="fas fa-user"></i>
+                            <div style="flex: 1;">
+                                <div class="info-label">Full Name</div>
+                                <div class="info-value" id="displayName">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-envelope"></i>
+                            <div style="flex: 1;">
+                                <div class="info-label">Email Address</div>
+                                <div class="info-value" id="displayEmail">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-phone"></i>
+                            <div style="flex: 1;">
+                                <div class="info-label">Phone Number</div>
+                                <div class="info-value" id="displayPhone">Not provided</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <i class="fab fa-facebook"></i>
+                            <div style="flex: 1;">
+                                <div class="info-label">Facebook Account</div>
+                                <div class="info-value" id="displayFacebook">Not linked</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div style="flex: 1;">
+                                <div class="info-label">Delivery Address</div>
+                                <div class="info-value" id="displayAddress">Not provided</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="switchToEditMode()">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="editMode">
+                <div class="profile-card">
+                    <h2><i class="fas fa-edit"></i> Edit Profile</h2>
+                    <form class="edit-form" id="profileForm" onsubmit="saveProfile(event)">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="editName" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" id="editEmail" readonly style="background: #f3f4f6; cursor: not-allowed;">
+                            <small style="color: #6b7280; font-size: 0.875rem;">Email cannot be changed</small>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="tel" id="editPhone" placeholder="Enter your phone number">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-facebook"></i> Facebook Account</label>
+                            <input type="text" id="editFacebook" placeholder="Facebook profile name or URL">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Delivery Address</label>
+                            <textarea id="editAddress" placeholder="Enter your complete delivery address"></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                    <div id="googleAuthNotice" class="google-auth-notice" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <p><strong>Google Account:</strong> You're signed in with Google. Some profile information is managed by your Google account.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/books-data.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/user-notifications.js"></script>
+    <script src="../js/ticket-notifications.js"></script>
+    <script src="../js/cart.js?v=5"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (!auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update auth UI
+            if (typeof updateAuthUI === 'function') {
+                updateAuthUI();
+            }
+
+            currentUser = auth.getCurrentUser();
+            loadProfile();
+            updateCartBadge();
+        });
+
+        function loadProfile() {
+            if (!currentUser) return;
+
+            // Update header
+            document.getElementById('headerName').textContent = currentUser.name;
+            document.getElementById('headerEmail').textContent = currentUser.email;
+
+            // Update view mode
+            document.getElementById('displayName').textContent = currentUser.name;
+            document.getElementById('displayEmail').textContent = currentUser.email;
+            document.getElementById('displayPhone').textContent = currentUser.phone || 'Not provided';
+            document.getElementById('displayFacebook').textContent = currentUser.facebookAccount || 'Not linked';
+            document.getElementById('displayAddress').textContent = currentUser.address || 'Not provided';
+
+            // Show view mode by default
+            document.getElementById('viewMode').classList.add('active');
+        }
+
+        function switchToEditMode() {
+            // Populate edit form
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editEmail').value = currentUser.email;
+            document.getElementById('editPhone').value = currentUser.phone || '';
+            document.getElementById('editFacebook').value = currentUser.facebookAccount || '';
+            document.getElementById('editAddress').value = currentUser.address || '';
+
+            // Show Google auth notice if applicable
+            if (!currentUser.password) {
+                document.getElementById('googleAuthNotice').style.display = 'flex';
+            }
+
+            // Switch modes
+            document.getElementById('viewMode').classList.remove('active');
+            document.getElementById('editMode').classList.add('active');
+        }
+
+        function cancelEdit() {
+            document.getElementById('editMode').classList.remove('active');
+            document.getElementById('viewMode').classList.add('active');
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+
+            const updatedData = {
+                name: document.getElementById('editName').value,
+                phone: document.getElementById('editPhone').value,
+                facebookAccount: document.getElementById('editFacebook').value,
+                address: document.getElementById('editAddress').value
+            };
+
+            // Update user data
+            if (auth.updateUserProfile(updatedData)) {
+                currentUser = auth.getCurrentUser();
+                loadProfile();
+                cancelEdit();
+                await CustomModal.success('Profile updated successfully!', 'Success');
+            } else {
+                await CustomModal.error('Failed to update profile', 'Error');
+            }
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            if (badge && typeof cartManager !== 'undefined') {
+                const cartCount = cartManager.getItemCount();
+                badge.textContent = cartCount;
+                badge.style.display = cartCount > 0 ? 'flex' : 'none';
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('mobile-open');
+            }
+            
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
+        }
+    </script>
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+</body>
+</html>

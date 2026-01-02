@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookNest - Under Maintenance</title>
+    <link rel="icon" href="images/logo.jpg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #134e4a;
+        }
+        .maintenance-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: #f0fdfa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            border: 4px solid #ccfbf1;
+        }
+        .icon-wrapper i {
+            font-size: 3rem;
+            color: #2F5D62;
+        }
+        h1 {
+            color: #2F5D62;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .admin-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            display: inline-block;
+        }
+        .admin-link:hover {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="maintenance-card">
+        <div class="icon-wrapper">
+            <i class="fas fa-tools"></i>
+        </div>
+        <h1>Under Maintenance</h1>
+        <p>We're currently performing scheduled maintenance to improve your experience. BookNest will be back online shortly.</p>
+        <p style="font-weight: 600; color: #2F5D62;">Thank you for your patience!</p>
+        
+        <a href="pages/admin-login.html" class="admin-link">Admin Access</a>
+    </div>
+    <script>
+        // Check if maintenance is over
+        setInterval(() => {
+            if (localStorage.getItem('site_maintenance_mode') !== 'true') {
+                window.location.href = 'index.html';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Notice - BookNest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <i class="fas fa-bars mobile-menu-btn" onclick="toggleMobileSidebar()"></i>
+            <div class="nav-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo">
+                <span>BookNest</span>
+            </div>
+            <div class="nav-links">
+                <a href="../home.html" class="nav-link">
+                    <i class="fas fa-store"></i> STORE
+                </a>
+                <a href="cart.html" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> CART
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </a>
+                <a href="pile.html" class="nav-link">
+                    <i class="fas fa-layer-group"></i> PILE
+                </a>
+                <a href="orders.html" class="nav-link">
+                    <i class="fas fa-file-invoice"></i> ORDERS
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i> PROFILE
+                </a>
+                <a href="customer-service.html" class="nav-link">
+                    <i class="fas fa-headset"></i> SUPPORT
+                </a>
+                <a href="important-notice.html" class="nav-link active">
+                    <i class="fas fa-exclamation-triangle"></i> NOTICE
+                </a>
+            </div>
+
+            <!-- Navigation links moved to sidebar -->
+            <div class="nav-actions">
+                <div class="notification-bell" id="notificationBell" style="position: relative; margin-right: 15px; cursor: pointer;">
+                    <i class="fas fa-bell" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="userNotificationBadge" style="display: none;">0</span>
+                </div>
+                <button class="user-btn" id="userBtn" style="display: none;">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+                <span>BookNest</span>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="../home.html" class="sidebar-link">
+                <i class="fas fa-store"></i> STORE
+            </a>
+            <a href="cart.html" class="sidebar-link">
+                <i class="fas fa-shopping-cart"></i> CART
+                <span class="cart-badge" id="cartBadge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none;">0</span>
+            </a>
+            <a href="pile.html" class="sidebar-link">
+                <i class="fas fa-layer-group"></i> PILE
+            </a>
+            <a href="orders.html" class="sidebar-link">
+                <i class="fas fa-receipt"></i> ORDERS AND INVOICES
+            </a>
+            <a href="profile.html" class="sidebar-link" id="profileSidebarLink" style="display: none;">
+                <i class="fas fa-user-circle"></i> MY PROFILE
+            </a>
+            <a href="my-tickets.html" class="sidebar-link" id="myTicketsSidebarLink" style="display: none;">
+                <i class="fas fa-ticket-alt"></i> MY TICKETS
+            </a>
+            <a href="customer-service.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> CUSTOMER SUPPORT
+                <span class="notification-badge" id="ticketNotificationBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
+            </a>
+            <a href="#" class="sidebar-link active" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border-left: 4px solid #f59e0b;">
+                <i class="fas fa-exclamation-triangle"></i> IMPORTANT NOTICE
+            </a>
+            <a href="login.html" class="sidebar-link" id="authLink" onclick="if(this.textContent.includes('Logout')) { event.preventDefault(); showLogoutConfirmation('login.html'); }">
+                <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header" style="background: linear-gradient(135deg, #2F5D62, #1F3D40); color: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem;">
+            <h1 style="margin: 0; display: flex; align-items: center; gap: 1rem; font-size: 2rem;">
+                <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
+                IMPORTANT REMINDERS
+            </h1>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem;">Please read these carefully before making any purchase</p>
+        </div>
+
+        <!-- Important Reminders Content -->
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <!-- Main Warning Box -->
+            <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 3px solid #f59e0b; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 8px 30px rgba(245, 158, 11, 0.3);">
+                <h2 style="color: #92400e; margin: 0 0 1.5rem 0; font-size: 1.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-bell" style="font-size: 2rem;"></i>
+                    KEY POLICIES
+                </h2>
+                <div style="color: #1e293b; line-height: 2; font-size: 1.05rem; background: white; padding: 1.5rem; border-radius: 12px;">
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">⚠️</strong> <strong>Strictly NO CANCELLATION or CHANGING of orders once the invoice has been issued.</strong></p>
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">⏰</strong> <strong>Payment deadline:</strong> within <strong>24 hours</strong> of receiving your invoice. Prompt payments are highly appreciated!</p>
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">💰</strong> <strong>Late payments:</strong> A <strong>₱10 fee per day</strong> will be charged for overdue payments. Unpaid orders may be marked as "joyjoy minor".</p>
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">📦</strong> If you wish to have your books <strong>shipped</strong>, please send a message.</p>
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">🚚</strong> <strong>Shipping days:</strong> <strong>Saturday, Sunday, or Monday only.</strong></p>
+                    <p style="margin-bottom: 1.25rem;"><strong style="color: #f59e0b;">📅</strong> Books may be stored for up to <strong>one (1) month</strong> from the date of purchase. Unclaimed or unshipped books after this period will be <strong>forfeited / donated with no refund.</strong></p>
+                    <p style="margin-bottom: 0;"><strong style="color: #f59e0b;">⚠️</strong> The seller is <strong>not responsible</strong> for any damages (such as foxing, tanning, discoloration, or wear) that may occur if books are stored (piling) for an extended time.</p>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div style="background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h2 style="color: #2F5D62; margin: 0 0 1.5rem 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-credit-card"></i>
+                    Payment Information
+                </h2>
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <div style="width: 80px; height: 80px; background: #007DFF; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; color: white; margin-bottom: 1rem;">G</div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 1.3rem;">GCash Payment</h3>
+                        <p style="margin: 0.5rem 0 0 0; color: #64748b;">Official BookNest Payment Method</p>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; border: 3px solid #007DFF;">
+                        <p style="margin: 0 0 0.5rem 0; color: #64748b; font-weight: 600;">Account Name</p>
+                        <p style="margin: 0 0 1rem 0; font-size: 1.3rem; font-weight: bold; color: #007DFF;">BookNest</p>
+                        <p style="margin: 0 0 0.5rem 0; color: #64748b; font-weight: 600;">GCash Number</p>
+                        <p style="margin: 0; font-size: 2rem; font-weight: bold; color: #007DFF;">09764097987</p>
+                    </div>
+                </div>
+                <div style="background: #fef3c7; padding: 1.25rem; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0; color: #92400e; line-height: 1.8;">
+                        <i class="fas fa-info-circle"></i> <strong>Important:</strong> After payment, please send a screenshot of your payment confirmation to verify your transaction. Your order will be processed once payment is confirmed.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Shipping & Storage -->
+            <div style="background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h2 style="color: #2F5D62; margin: 0 0 1.5rem 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-shipping-fast"></i>
+                    Shipping & Storage
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                        <h3 style="margin: 0 0 1rem 0; color: #1e40af; font-size: 1.2rem;"><i class="fas fa-truck"></i> Shipping Option</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem; color: #334155; line-height: 2;">
+                            <li>Available only on <strong>Saturday, Sunday, and Monday</strong></li>
+                            <li>Send a message to request shipping</li>
+                            <li>Provide complete and accurate address</li>
+                            <li>Shipping fee may apply depending on location</li>
+                        </ul>
+                    </div>
+                    <div style="background: #fef3c7; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                        <h3 style="margin: 0 0 1rem 0; color: #92400e; font-size: 1.2rem;"><i class="fas fa-layer-group"></i> Piling Option</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem; color: #334155; line-height: 2;">
+                            <li>Books stored for up to <strong>30 days</strong></li>
+                            <li>Free storage within the 30-day period</li>
+                            <li>Must claim or arrange shipping within deadline</li>
+                            <li>Unclaimed books will be donated/forfeited</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="background: #fee2e2; padding: 1.25rem; border-radius: 10px; border-left: 4px solid #ef4444; margin-top: 1.5rem;">
+                    <p style="margin: 0; color: #991b1b; line-height: 1.8;">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Storage Disclaimer:</strong> BookNest is not responsible for damage during storage including foxing (brown spots), yellowing, shelf wear, or environmental aging. Store at your own risk.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Book Conditions -->
+            <div style="background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h2 style="color: #2F5D62; margin: 0 0 1.5rem 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-book"></i>
+                    Book Conditions Explained
+                </h2>
+                <div style="display: grid; gap: 1.5rem;">
+                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #22c55e;">
+                        <h3 style="margin: 0 0 0.75rem 0; color: #15803d; font-size: 1.2rem;">✨ Brand New</h3>
+                        <p style="margin: 0; color: #334155; line-height: 1.8;">Books in pristine, unopened condition. Never been read or used. Perfect for collectors or gifts.</p>
+                    </div>
+                    <div style="background: #fef3c7; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                        <h3 style="margin: 0 0 0.75rem 0; color: #92400e; font-size: 1.2rem;">💚 Pre-Loved</h3>
+                        <p style="margin: 0; color: #334155; line-height: 1.8;">Previously owned books in good readable condition. May have minor wear, markings, or shelf wear. Great value for budget-conscious readers.</p>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #6b7280;">
+                        <h3 style="margin: 0 0 0.75rem 0; color: #374151; font-size: 1.2rem;">📦 Remaindered</h3>
+                        <p style="margin: 0; color: #334155; line-height: 1.8;">Overstock or discontinued books sold at reduced prices. May have remainder marks but are readable. Perfect for bargain hunters.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div style="background: linear-gradient(135deg, #2F5D62, #1F3D40); color: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 8px 30px rgba(47, 93, 98, 0.4);">
+                <h2 style="margin: 0 0 1rem 0; font-size: 1.75rem;"><i class="fas fa-question-circle"></i> Have Questions?</h2>
+                <p style="margin: 0 0 1.5rem 0; font-size: 1.1rem; opacity: 0.95;">Feel free to reach out to us for any inquiries or concerns</p>
+                <div onclick="window.location.href='customer-service.html'" style="cursor: pointer; display: inline-block; background: white; color: #2F5D62; padding: 1rem 2rem; border-radius: 12px; font-weight: bold; font-size: 1.1rem;">
+                    <i class="fas fa-envelope"></i> Contact BookNest Support
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/books-data.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/user-notifications.js"></script>
+    <script src="../js/ticket-notifications.js"></script>
+    <script src="../js/cart.js?v=5"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update auth UI
+            if (typeof updateAuthUI === 'function') {
+                updateAuthUI();
+            }
+
+            // Initialize cart badge
+            if (typeof cartManager !== 'undefined' && cartManager) {
+                cartManager.updateCartBadge();
+                console.log('Cart badge updated on important-notice page');
+            } else {
+                console.error('cartManager not found');
+            }
+            
+            // Logout button - use once to prevent duplicate listeners
+            const authLink = document.getElementById('authLink');
+            if (authLink) {
+                // Remove any existing listeners
+                const newAuthLink = authLink.cloneNode(true);
+                authLink.parentNode.replaceChild(newAuthLink, authLink);
+                
+                // Add new listener
+                newAuthLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Logout clicked - showing confirmation modal');
+                    showLogoutConfirmation('login.html');
+                });
+            }
+        });
+        
+        function updateAuthUI() {
+            const userBtn = document.getElementById('userBtn');
+            if (auth.isLoggedIn()) {
+                if (userBtn) {
+                    userBtn.style.display = 'flex';
+                    userBtn.onclick = openUserModal;
+                }
+            } else {
+                if (userBtn) userBtn.style.display = 'none';
+            }
+        }
+        
+        function openUserModal() {
+            if (!auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = auth.getCurrentUser();
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'userMenuModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 16px; max-width: 420px; width: 90%; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 100px; height: 100px; border-radius: 50%; background: #2F5D62; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 3rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #1f2937; text-transform: uppercase;">${user.name}</h2>
+                        <p style="margin: 0 0 0.75rem 0; color: #64748b; font-size: 0.95rem;">${user.email}</p>
+                        <div style="display: inline-block; padding: 0.35rem 1rem; background: #10b981; color: white; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                            ${user.role}
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem;">
+                        <button onclick="closeUserMenuNotice(); window.location.href='../home.html';" style="width: 100%; padding: 1rem; background: #2F5D62; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#1F3D40'" onmouseout="this.style.background='#2F5D62'">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </button>
+                        
+                        <button onclick="closeUserMenuNotice(); window.location.href='orders.html';" style="width: 100%; padding: 1rem; background: white; color: #2F5D62; border: 2px solid #e5e7eb; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <i class="fas fa-receipt"></i> My Orders
+                        </button>
+                        
+                        <button onclick="closeUserMenuNotice(); showLogoutConfirmation('login.html');" style="width: 100%; padding: 1rem; background: white; color: #2F5D62; border: 2px solid #e5e7eb; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                    
+                    <button onclick="closeUserMenuNotice()" style="width: 100%; padding: 0.875rem; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#d1d5db'" onmouseout="this.style.background='#e5e7eb'">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeUserMenuNotice();
+                }
+            });
+        }
+
+        function closeUserMenuNotice() {
+            const modal = document.getElementById('userMenuModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('mobile-open');
+            }
+            
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
+        }
+    </script>
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+</body>
+</html>

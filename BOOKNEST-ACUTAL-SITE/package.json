@@ -1,0 +1,12 @@
+{
+  "name": "booknest",
+  "version": "1.0.0",
+  "description": "BookNest - Online Bookstore with Admin Panel",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": ["bookstore", "e-commerce", "books"],
+  "author": "BookNest Team",
+  "license": "MIT"
+}
