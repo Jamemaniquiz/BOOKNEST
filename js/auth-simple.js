@@ -262,6 +262,15 @@ Verification Code: ${code}
         users.push(newUser);
         localStorage.setItem('booknest_users', JSON.stringify(users));
         
+        // === FIRESTORE SYNC ===
+        if (window.backend && window.backend.useFirestore) {
+            // Save to Firestore asynchronously
+            window.backend.save('users', newUser, newUser.id)
+                .then(() => console.log('✓ User synced to Firestore:', newUser.email))
+                .catch(err => console.error('❌ Failed to sync user to Firestore:', err));
+        }
+        // ======================
+        
         // Trigger event for real-time sync across tabs
         localStorage.setItem('booknest_user_updated', Date.now().toString());
         localStorage.removeItem('booknest_user_updated');

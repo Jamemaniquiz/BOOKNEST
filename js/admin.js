@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(async () => {
         if (window.backend && window.backend.useFirestore) {
             try {
+                // 1. Sync Books
                 const firestoreBooks = await window.backend.load('books');
                 if (firestoreBooks && firestoreBooks.length > 0) {
                     console.log('✓ Admin loaded books from Firestore:', firestoreBooks.length);
@@ -34,6 +35,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('booksData', JSON.stringify(currentBooks));
                     loadBooksTable(); // Refresh UI
                     loadOverview();   // Refresh Stats
+                }
+
+                // 2. Sync Users
+                const firestoreUsers = await window.backend.load('users');
+                if (firestoreUsers && firestoreUsers.length > 0) {
+                    console.log('✓ Admin loaded users from Firestore:', firestoreUsers.length);
+                    localStorage.setItem('booknest_users', JSON.stringify(firestoreUsers));
+                    // If we are on the users tab, refresh it
+                    const currentSection = document.querySelector('.dashboard-section.active');
+                    if (currentSection && currentSection.id === 'users-section') {
+                        loadUsersTable();
+                    }
                 }
             } catch (e) {
                 console.error('Error syncing with Firestore:', e);
