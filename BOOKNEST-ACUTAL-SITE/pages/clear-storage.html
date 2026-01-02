@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Storage - BookNest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .success {
+            display: none;
+            color: #10b981;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear Browser Storage</h1>
+        <p>Manage your local data below.</p>
+        
+        <button onclick="clearOrders()" style="background: #f59e0b;">
+            📦 Clear Orders
+        </button>
+        
+        <button onclick="clearPile()" style="background: #10b981;">
+            📚 Clear Pile
+        </button>
+        
+        <button onclick="clearAll()" style="background: #ef4444;">
+            🗑️ Clear All Data
+        </button>
+        
+        <div class="success" id="success"></div>
+        <button onclick="goToHome()" style="background: #2F5D62; margin-top: 20px;">🏠 Go to Home</button>
+    </div>
+
+    <script>
+        function showMessage(msg) {
+            const el = document.getElementById('success');
+            el.innerHTML = msg;
+            el.style.display = 'block';
+        }
+
+        function clearOrders() {
+            localStorage.removeItem('orders');
+            showMessage('✅ Orders cleared!');
+        }
+
+        function clearPile() {
+            localStorage.removeItem('pile');
+            showMessage('✅ Pile cleared!');
+        }
+
+        function clearAll() {
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Clear sessionStorage
+            sessionStorage.clear();
+            
+            showMessage('✅ All data cleared!');
+        }
+
+        function goToHome() {
+            window.location.href = '../home.html';
+        }
+    </script>
+</body>
+</html>

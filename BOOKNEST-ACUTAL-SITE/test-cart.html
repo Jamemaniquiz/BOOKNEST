@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Debug Test</title>
+</head>
+<body>
+    <h1>Cart Debug Test</h1>
+    <button onclick="checkCart()">Check Cart</button>
+    <button onclick="addTestItem()">Add Test Item</button>
+    <button onclick="clearCart()">Clear Cart</button>
+    <div id="output" style="margin-top: 20px; padding: 20px; background: #f0f0f0;"></div>
+
+    <script src="js/cart.js?v=5"></script>
+    <script>
+        const cartManager = new CartManager();
+
+        function checkCart() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            document.getElementById('output').innerHTML = `
+                <h3>Cart Debug Info:</h3>
+                <p><strong>Cart Items:</strong> ${cart.length}</p>
+                <p><strong>Total Quantity:</strong> ${count}</p>
+                <p><strong>CartManager Count:</strong> ${cartManager.getItemCount()}</p>
+                <pre>${JSON.stringify(cart, null, 2)}</pre>
+            `;
+
+            // Try updating badge
+            cartManager.updateCartBadge();
+        }
+
+        function addTestItem() {
+            const testItem = {
+                id: 999,
+                title: "Test Book",
+                price: 100,
+                stock: 10
+            };
+            cartManager.addToCart(testItem);
+            checkCart();
+        }
+
+        function clearCart() {
+            localStorage.removeItem('cart');
+            cartManager.cart = [];
+            checkCart();
+        }
+
+        // Auto check on load
+        window.onload = checkCart;
+    </script>
+</body>
+</html>

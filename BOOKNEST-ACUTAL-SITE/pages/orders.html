@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - BookNest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/orders.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/firestore-backend.js"></script>
+    <script src="../js/user-notifications.js"></script>
+    
+    <script src="../js/modal.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <i class="fas fa-bars mobile-menu-btn" onclick="toggleMobileSidebar()"></i>
+            <div class="nav-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo">
+                <span>BookNest</span>
+            </div>
+            <div class="nav-links">
+                <a href="../home.html" class="nav-link">
+                    <i class="fas fa-store"></i> STORE
+                </a>
+                <a href="cart.html" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> CART
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </a>
+                <a href="pile.html" class="nav-link">
+                    <i class="fas fa-layer-group"></i> PILE
+                </a>
+                <a href="orders.html" class="nav-link active">
+                    <i class="fas fa-file-invoice"></i> ORDERS
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i> PROFILE
+                </a>
+                <a href="customer-service.html" class="nav-link">
+                    <i class="fas fa-headset"></i> SUPPORT
+                </a>
+                <a href="important-notice.html" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i> NOTICE
+                </a>
+            </div>
+
+            <!-- Navigation links moved to sidebar -->
+            <div class="nav-actions">
+                <div class="wishlist-icon" id="wishlistIcon" style="position: relative; margin-right: 15px; cursor: pointer;" onclick="openWishlistModal()">
+                    <i class="fas fa-heart" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="wishlistBadge" style="display: none;">0</span>
+                </div>
+                <div class="notification-bell" id="notificationBell" style="position: relative; margin-right: 15px; cursor: pointer;">
+                    <i class="fas fa-bell" style="font-size: 1.2rem; color: #2F5D62;"></i>
+                    <span class="notification-badge" id="userNotificationBadge" style="display: none;">0</span>
+                </div>
+                <button class="user-btn" id="userBtn" style="display: none;">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+                <span>BookNest</span>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="../home.html" class="sidebar-link">
+                <i class="fas fa-store"></i> STORE
+            </a>
+            <a href="cart.html" class="sidebar-link">
+                <i class="fas fa-shopping-cart"></i> CART
+                <span class="cart-badge" id="cartBadge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">0</span>
+            </a>
+            <a href="pile.html" class="sidebar-link">
+                <i class="fas fa-layer-group"></i> PILE
+            </a>
+            <a href="orders.html" class="sidebar-link active">
+                <i class="fas fa-receipt"></i> ORDERS AND INVOICES
+            </a>
+            <a href="profile.html" class="sidebar-link" id="profileSidebarLink" style="display: none;">
+                <i class="fas fa-user-circle"></i> MY PROFILE
+            </a>
+            <a href="my-tickets.html" class="sidebar-link" id="myTicketsSidebarLink" style="display: none;">
+                <i class="fas fa-ticket-alt"></i> MY TICKETS
+            </a>
+            <a href="customer-service.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> CUSTOMER SUPPORT
+                <span class="notification-badge" id="ticketNotificationBadge" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
+            </a>
+            <a href="important-notice.html" class="sidebar-link" style="color: #f59e0b;">
+                <i class="fas fa-exclamation-triangle"></i> IMPORTANT NOTICE
+            </a>
+            <a href="login.html" class="sidebar-link" id="authLink" onclick="if(this.textContent.includes('Logout')) { event.preventDefault(); showLogoutConfirmation('login.html'); }">
+                <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h1><i class="fas fa-receipt"></i> My Orders</h1>
+        </div>
+
+        <div class="orders-tabs">
+            <button class="tab-btn active" data-tab="all">All Orders</button>
+            <button class="tab-btn" data-tab="pending">Pending</button>
+            <button class="tab-btn" data-tab="completed">Completed</button>
+            <button class="tab-btn" data-tab="cancelled">Cancelled</button>
+        </div>
+
+        <div id="ordersContainer" class="orders-container">
+            <!-- Orders will be loaded here -->
+        </div>
+    </main>
+
+    <script src="../js/books-data.js"></script>
+    <script src="../js/modal-utils.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/ticket-notifications.js"></script>
+    <script src="../js/cart.js?v=6"></script>
+    <script src="../js/main.js?v=6"></script>
+    <script src="../js/orders.js?v=6"></script>
+    <script src="../js/storage-manager.js"></script>
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+</body>
+</html>

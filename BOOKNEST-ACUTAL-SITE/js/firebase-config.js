@@ -2,13 +2,12 @@
 // IMPORTANT: Replace this with YOUR Firebase config from Firebase Console
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAr16_7G730Ij4aUy8V9E2d_mgAcIRYIt0",
-  authDomain: "booknest-28065.firebaseapp.com",
-  projectId: "booknest-28065",
-  storageBucket: "booknest-28065.firebasestorage.app",
-  messagingSenderId: "435500850002",
-  appId: "1:435500850002:web:1713dcff6f0075a583388b",
-  measurementId: "G-0EWRD0PGM1"
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 // Only initialize Firebase if config is properly set
