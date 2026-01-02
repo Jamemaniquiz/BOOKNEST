@@ -71,27 +71,44 @@ function initializeApp() {
     }
 }
 
-function loadBooks(searchTerm = '') {
+async function loadBooks(searchTerm = '') {
     const booksGrid = document.getElementById('booksGrid');
     if (!booksGrid) return;
     
-    // ALWAYS load books from localStorage to get latest admin updates
-    const storedBooks = localStorage.getItem('booksData');
     let currentBooksData;
     
-    if (storedBooks) {
+    // === FIRESTORE FIRST ===
+    if (window.backend && window.backend.useFirestore) {
         try {
-            currentBooksData = JSON.parse(storedBooks);
-            console.log('✓ Loaded books from localStorage:', currentBooksData.length, 'books');
+            const firestoreBooks = await window.backend.load('books');
+            if (firestoreBooks && firestoreBooks.length > 0) {
+                currentBooksData = firestoreBooks;
+                localStorage.setItem('booksData', JSON.stringify(firestoreBooks));
+                console.log('✓ Buyer loaded books from Firestore:', firestoreBooks.length, 'books');
+            } else {
+                throw new Error('No books in Firestore');
+            }
         } catch (error) {
-            console.error('Error parsing stored books:', error);
-            currentBooksData = booksData;
+            console.warn('Firestore load failed, using localStorage:', error.message);
+            const storedBooks = localStorage.getItem('booksData');
+            currentBooksData = storedBooks ? JSON.parse(storedBooks) : booksData;
         }
     } else {
-        // First time - save sample data to localStorage
-        currentBooksData = booksData;
-        localStorage.setItem('booksData', JSON.stringify(booksData));
-        console.log('✓ Initialized localStorage with sample books');
+        // Fallback to localStorage
+        const storedBooks = localStorage.getItem('booksData');
+        if (storedBooks) {
+            try {
+                currentBooksData = JSON.parse(storedBooks);
+                console.log('✓ Loaded books from localStorage:', currentBooksData.length, 'books');
+            } catch (error) {
+                console.error('Error parsing stored books:', error);
+                currentBooksData = booksData;
+            }
+        } else {
+            currentBooksData = booksData;
+            localStorage.setItem('booksData', JSON.stringify(booksData));
+            console.log('✓ Initialized localStorage with sample books');
+        }
     }
     
     let filteredBooks = currentBooksData;
