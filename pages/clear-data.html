@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔧 Fix BookNest Data</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Important!</strong><br>
+            The authentication system has been updated.<br>
+            Click the button below to clear old data and start fresh.
+        </div>
+
+        <button onclick="clearOldData()">Clear Old Data & Start Fresh</button>
+        
+        <div id="success" class="success">
+            ✅ Data cleared successfully!<br>
+            <button onclick="goToLogin()">Go to Login Page</button>
+        </div>
+    </div>
+
+    <script>
+        function clearOldData() {
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Clear all sessionStorage
+            sessionStorage.clear();
+            
+            // Show success message
+            document.getElementById('success').style.display = 'block';
+            document.querySelector('.warning').style.display = 'none';
+            
+            console.log('✅ All old data cleared!');
+        }
+
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

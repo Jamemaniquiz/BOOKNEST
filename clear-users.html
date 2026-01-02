@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Test Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .button {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 Clear Test Users</h1>
+    <p>This will remove all non-admin users from localStorage</p>
+    
+    <button class="button" onclick="clearUsers()">Clear Non-Admin Users</button>
+    <button class="button" onclick="viewUsers()" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">View Current Users</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function clearUsers() {
+            try {
+                let users = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+                const beforeCount = users.length;
+                
+                // Keep only admin users
+                users = users.filter(u => u.role === 'admin');
+                
+                // Fix admin name if undefined
+                users = users.map(u => {
+                    if (!u.name || u.name === 'undefined') {
+                        u.name = 'Admin User';
+                    }
+                    return u;
+                });
+                
+                // Save back
+                localStorage.setItem('booknest_users', JSON.stringify(users));
+                
+                const deletedCount = beforeCount - users.length;
+                
+                document.getElementById('result').innerHTML = `
+                    <h2>✅ Success!</h2>
+                    <p>Deleted ${deletedCount} non-admin user(s)</p>
+                    <p>Remaining users: ${users.length} admin(s)</p>
+                    <p>Admin names fixed (if any were undefined)</p>
+                    <p style="color: #666; margin-top: 20px;">
+                        <strong>Next steps:</strong><br>
+                        1. Close this tab<br>
+                        2. Refresh your admin page
+                    </p>
+                `;
+            } catch (e) {
+                document.getElementById('result').innerHTML = `
+                    <h2>❌ Error</h2>
+                    <p>${e.message}</p>
+                `;
+            }
+        }
+        
+        function viewUsers() {
+            try {
+                let users = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+                
+                let html = '<h2>📋 Current Users</h2>';
+                if (users.length === 0) {
+                    html += '<p>No users found</p>';
+                } else {
+                    html += '<div style="text-align: left; max-height: 400px; overflow-y: auto;">';
+                    users.forEach((user, index) => {
+                        html += `
+                            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                                <strong>${index + 1}. ${user.name || 'No name'}</strong><br>
+                                <span style="color: #666;">Email: ${user.email}</span><br>
+                                <span style="color: ${user.role === 'admin' ? '#059669' : '#3b82f6'};">
+                                    Role: ${user.role || 'buyer'}
+                                </span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                document.getElementById('result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('result').innerHTML = `
+                    <h2>❌ Error</h2>
+                    <p>${e.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

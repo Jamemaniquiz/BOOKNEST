@@ -90,6 +90,11 @@
     color: #991B1B;
 }
 
+.order-status.shipped {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
 .order-items {
     display: flex;
     flex-direction: column;
@@ -226,20 +231,37 @@
 .btn-shop-now {
     display: inline-block;
     padding: 0.875rem 2rem;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
     color: white;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(47, 93, 98, 0.3);
 }
 
 .btn-shop-now:hover {
-    background-color: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(47, 93, 98, 0.4);
+}
+
+.btn-shop-now i {
+    margin-right: 0.5rem;
 }
 
 @media (max-width: 768px) {
+    .orders-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .orders-tabs .tab-btn {
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
     .order-header {
         flex-direction: column;
         align-items: flex-start;

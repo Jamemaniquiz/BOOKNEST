@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - BookNest</title>
+    <title>BookNest</title>
+    <link rel="icon" href="../images/logo.jpg" type="image/jpeg">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/auth.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
 </head>
 <body class="auth-page">
     <div class="auth-container">
@@ -77,14 +79,15 @@
                 // Create admin user data manually
                 const adminUser = {
                     id: 'admin-001',
+                    name: 'Admin',
                     email: email,
                     role: 'admin',
                     confirmed: true,
                     createdAt: new Date().toISOString()
                 };
                 
-                // Save to localStorage
-                localStorage.setItem('currentUser', JSON.stringify(adminUser));
+                // Save to localStorage with correct key
+                localStorage.setItem('booknest_current_user', JSON.stringify(adminUser));
                 localStorage.setItem('adminLoggedIn', '1');
                 
                 messageDiv.style.color = '#0a0';

@@ -132,17 +132,13 @@ class AuthSystem {
             return { success: false, message: 'This Gmail is already registered' };
         }
 
-        // Generate 6-digit confirmation code
-        const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Create new user
+        // Create new user (Auto-confirmed)
         const newUser = {
             id: data.users.length > 0 ? Math.max(...data.users.map(u => u.id)) + 1 : 1,
             email: email.toLowerCase(),
             name,
             role: 'buyer',
-            confirmed: false,
-            confirmationCode,
+            confirmed: true, // Auto-confirm
             createdAt: new Date().toISOString()
         };
 
@@ -150,12 +146,11 @@ class AuthSystem {
         data.timestamp = new Date().toISOString();
         // Save to encrypted database
         if (this.db.saveData(data)) {
-            // Send verification code to email
-            await this.sendVerificationCode(email, confirmationCode);
+            // Auto-login
+            this.currentUser = newUser;
+            this.saveCurrentUser();
             
-            // Store code in session for confirmation
-            sessionStorage.setItem('pendingConfirmation', JSON.stringify({ email: newUser.email, code: confirmationCode }));
-            return { success: true, message: 'Registration successful! A verification code has been sent to your Gmail.' };
+            return { success: true, message: 'Registration successful!' };
         } else {
             return { success: false, message: 'Registration failed. Please try again.' };
         }

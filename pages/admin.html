@@ -8,22 +8,38 @@
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/modal.js"></script>
+    <style>
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
+            <i class="fas fa-bars mobile-menu-btn" onclick="toggleMobileSidebar()"></i>
             <div class="nav-logo">
-                <i class="fas fa-book-open"></i>
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%; margin-right: 10px;">
                 <span>BookNest Admin</span>
             </div>
-            <div class="nav-actions">
-                <span class="admin-badge">
+            <div class="nav-actions" style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleNotifications()" style="background: none; border: none; color: #2F5D62; cursor: pointer; font-size: 1.3rem; padding: 0.5rem; position: relative; transition: all 0.3s;" title="Notifications" onmouseover="this.style.color='#1F4044'" onmouseout="this.style.color='#2F5D62'">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" style="position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.65rem; display: none; align-items: center; justify-content: center; font-weight: bold; padding: 0 4px; box-shadow: 0 2px 8px rgba(239,68,68,0.5); border: 2px solid white; animation: pulse 2s infinite;">0</span>
+                </button>
+                <span class="admin-badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(239,68,68,0.3); display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-shield-alt"></i> Admin Panel
                 </span>
-                <button class="user-btn" id="userBtn">
-                    <i class="fas fa-user"></i>
-                </button>
             </div>
         </div>
     </nav>
@@ -32,7 +48,7 @@
     <div class="sidebar admin-sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <i class="fas fa-cog"></i>
+                <img src="../images/logo.jpg" alt="BookNest Logo" style="height: 40px; width: auto; border-radius: 50%; margin-right: 10px;">
                 <span>Dashboard</span>
             </div>
         </div>
@@ -49,16 +65,30 @@
             <a href="#" class="sidebar-link" data-section="users">
                 <i class="fas fa-users"></i> Users
             </a>
-            <a href="../index.html" class="sidebar-link">
-                <i class="fas fa-store"></i> View Shop
+            <a href="admin-cs.html" class="sidebar-link">
+                <i class="fas fa-headset"></i> Customer Service
             </a>
-            <a href="admin-profile.html" class="sidebar-link">
+            <a href="#" class="sidebar-link" data-section="profile">
                 <i class="fas fa-user-circle"></i> Profile
+            </a>
+            <a href="#" class="sidebar-link" onclick="handleViewShop(); return false;">
+                <i class="fas fa-store"></i> View Shop
             </a>
             <a href="#" class="sidebar-link" onclick="handleLogout(); return false;">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </nav>
+    </div>
+
+    <!-- Notifications Sidebar -->
+    <div id="notificationsSidebar" style="position: fixed; right: -350px; top: 0; width: 350px; height: 100vh; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 1000; transition: right 0.3s ease; overflow-y: auto;">
+        <div style="padding: 1.5rem; border-bottom: 2px solid #2F5D62; background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%); color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-bell"></i> Notifications</h3>
+                <button onclick="closeNotifications()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">&times;</button>
+            </div>
+        </div>
+        <div id="notificationsList" style="padding: 1rem;"></div>
     </div>
 
     <!-- Main Content -->
@@ -67,6 +97,9 @@
         <section id="overview-section" class="dashboard-section active">
             <div class="section-header">
                 <h1><i class="fas fa-chart-line"></i> Dashboard Overview</h1>
+                <button onclick="loadOverview()" style="padding: 0.5rem 1rem; background: #2F5D62; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#1F3D40'" onmouseout="this.style.background='#2F5D62'">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
             </div>
             
             <div class="stats-grid">
@@ -111,6 +144,22 @@
                 </div>
             </div>
             
+            <div class="important-reminders" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 3px solid #f59e0b; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);">
+                <h2 style="color: #92400e; margin: 0 0 1.5rem 0; font-size: 1.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; animation: pulse 2s infinite;"></i>
+                    IMPORTANT REMINDERS
+                </h2>
+                <div style="color: #1e293b; line-height: 2; font-size: 1rem;">
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> <strong>Strictly NO CANCELLATION or CHANGING of orders once the invoice has been issued.</strong></p>
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> <strong>Payment deadline:</strong> within 24 hours of receiving your invoice. Prompt payments are highly appreciated!</p>
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> <strong>Late payments:</strong> A ₱10 fee per day will be charged for overdue payments. Unpaid orders may be marked as "joyjoy minor".</p>
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> If you wish to have your books shipped, please send a message.</p>
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> <strong>🚚 Shipping days:</strong> Saturday, Sunday, or Monday only.</p>
+                    <p style="margin-bottom: 1rem;"><strong style="color: #f59e0b;">•</strong> Books may be stored for up to <strong>one (1) month</strong> from the date of purchase. Unclaimed or unshipped books after this period will be forfeited / donated with no refund.</p>
+                    <p style="margin-bottom: 0;"><strong style="color: #f59e0b;">•</strong> The seller is not responsible for any damages (such as foxing, tanning, discoloration, or wear) that may occur if books are stored (piling) for an extended time.</p>
+                </div>
+            </div>
+            
             <div class="recent-orders">
                 <h2>Recent Orders</h2>
                 <div id="recentOrdersList"></div>
@@ -123,6 +172,15 @@
                 <h1><i class="fas fa-book"></i> Manage Books</h1>
                 <button class="btn-primary" onclick="showAddBookModal()">
                     <i class="fas fa-plus"></i> Add New Book
+                </button>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="flex: 1; position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" id="searchBooks" placeholder="Search by title, format, or condition..." style="padding: 0.75rem 1rem 0.75rem 2.5rem; border: 2px solid #e2e8f0; border-radius: 10px; width: 100%; font-size: 0.95rem; transition: all 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+                <button onclick="loadBooksTable()" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #2F5D62, #1F3D40); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
             
@@ -149,6 +207,23 @@
         <section id="orders-section" class="dashboard-section">
             <div class="section-header">
                 <h1><i class="fas fa-shopping-bag"></i> All Orders</h1>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <select id="filterOrderStatus" onchange="loadOrdersTable()" style="padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer;">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button onclick="exportOrdersToExcel()" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="Download as Excel/CSV">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                    <input type="text" id="searchOrders" placeholder="🔍 Search orders..." style="padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; min-width: 250px;">
+                    <button onclick="loadOrdersTable()" style="padding: 0.5rem 1rem; background: #2F5D62; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#1F3D40'" onmouseout="this.style.background='#2F5D62'">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
             </div>
             
             <div class="orders-table-container">
@@ -157,8 +232,12 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Customer</th>
+                            <th>Books</th>
+                            <th>Phone</th>
+                            <th>Address</th>
                             <th>Date</th>
                             <th>Total</th>
+                            <th>Type / Payment</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -174,16 +253,24 @@
         <section id="users-section" class="dashboard-section">
             <div class="section-header">
                 <h1><i class="fas fa-users"></i> Manage Users</h1>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="text" id="searchUsers" placeholder="🔍 Search users..." style="padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; min-width: 250px;">
+                    <button onclick="loadUsersTable()" style="padding: 0.5rem 1rem; background: #2F5D62; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#1F3D40'" onmouseout="this.style.background='#2F5D62'">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
             </div>
             
             <div class="users-table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Role</th>
+                            <th>Phone</th>
+                            <th>Facebook</th>
+                            <th>Address</th>
+                            <th>Password</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -193,76 +280,255 @@
                 </table>
             </div>
         </section>
+
+        <!-- Profile Section -->
+        <section id="profile-section" class="dashboard-section">
+            <div class="section-header">
+                <h1><i class="fas fa-user-circle"></i> Admin Profile</h1>
+            </div>
+            
+            <div class="stat-cards" style="max-width: 800px;">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(47, 93, 98, 0.3);">
+                            <i class="fas fa-user-circle" style="font-size: 5rem; color: white;"></i>
+                        </div>
+                        <h2 id="profileName" style="margin: 0 0 0.5rem 0; color: #1f2937; font-size: 2rem;">Loading...</h2>
+                        <p id="profileEmail" style="margin: 0 0 1rem 0; color: #6b7280; font-size: 1.1rem;">Loading...</p>
+                        <span style="display: inline-block; padding: 0.5rem 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                            <i class="fas fa-shield-alt"></i> Administrator
+                        </span>
+                    </div>
+
+                    <div style="border-top: 2px solid #e5e7eb; padding: 2rem; background: #f9fafb;">
+                        <h3 style="margin: 0 0 1.5rem 0; color: #1f2937; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-info-circle" style="color: #2F5D62;"></i>
+                            Account Information
+                        </h3>
+                        <div style="display: grid; gap: 1.25rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #2F5D62;">
+                                <i class="fas fa-user" style="font-size: 1.5rem; color: #2F5D62; width: 30px;"></i>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Full Name</div>
+                                    <div id="profileNameDetail" style="font-weight: 600; color: #1f2937; font-size: 1.1rem;">Loading...</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #10b981;">
+                                <i class="fas fa-envelope" style="font-size: 1.5rem; color: #10b981; width: 30px;"></i>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Email Address</div>
+                                    <div id="profileEmailDetail" style="font-weight: 600; color: #1f2937; font-size: 1.1rem;">Loading...</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <i class="fas fa-shield-alt" style="font-size: 1.5rem; color: #f59e0b; width: 30px;"></i>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Role & Permissions</div>
+                                    <div style="font-weight: 600; color: #1f2937; font-size: 1.1rem;">Full Administrator Access</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="admin-profile.html" style="flex: 1; min-width: 200px; padding: 1rem 1.5rem; background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(47, 93, 98, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <i class="fas fa-edit"></i> Edit Full Profile
+                        </a>
+                        <button onclick="handleLogout()" style="flex: 1; min-width: 200px; padding: 1rem 1.5rem; background: white; color: #dc2626; border: 2px solid #fecaca; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Add/Edit Book Modal -->
     <div class="modal" id="bookModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="bookModalTitle">Add New Book</h2>
-                <button class="close-btn" onclick="closeBookModal()">&times;</button>
+        <div class="modal-content" style="max-width: 950px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%); color: white; padding: 2rem; border-radius: 12px 12px 0 0;">
+                <h2 id="bookModalTitle" style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 1.75rem;"><i class="fas fa-book-medical"></i> <span>Add New Book</span></h2>
+                <button class="close-btn" onclick="closeBookModal()" style="background: rgba(255,255,255,0.2); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 2rem;">
                 <form id="bookForm">
                     <input type="hidden" id="bookId">
-                    <div class="form-group">
-                        <label for="bookTitle">Title</label>
-                        <input type="text" id="bookTitle" class="form-input" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookPrice">Price (PHP)</label>
-                            <input type="number" id="bookPrice" class="form-input" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookStock">Stock</label>
-                            <input type="number" id="bookStock" class="form-input" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookFormat">Format</label>
-                            <select id="bookFormat" class="form-input" required>
-                                <option value="Paperback">Paperback</option>
-                                <option value="Hardcover">Hardcover</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookOrigin">Condition</label>
-                            <select id="bookOrigin" class="form-input" required>
-                                <option value="Brand New">Brand New</option>
-                                <option value="Pre-Loved">Pre-Loved</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="bookImages">Book Images</label>
-                        <div class="image-upload-container">
-                            <div class="image-preview-grid" id="imagePreviewGrid">
-                                <!-- Image previews will appear here -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Left Column -->
+                        <div>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="bookTitle" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-heading" style="color: #2F5D62;"></i> Book Title</label>
+                                <input type="text" id="bookTitle" class="form-input" placeholder="Enter book title" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
                             </div>
-                            <div class="image-input-group">
-                                <input type="file" id="bookImageFile" class="form-input" accept="image/*" multiple>
-                                <button type="button" class="btn-add-image" onclick="addImageFile()">
-                                    <i class="fas fa-plus"></i> Add Image
-                                </button>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group">
+                                    <label for="bookPrice" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-tag" style="color: #2F5D62;"></i> Price (PHP)</label>
+                                    <input type="number" id="bookPrice" class="form-input" placeholder="0.00" step="0.01" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookStock" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-boxes" style="color: #2F5D62;"></i> Stock</label>
+                                    <input type="number" id="bookStock" class="form-input" placeholder="0" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                </div>
                             </div>
-                            <div class="upload-note">
-                                <small>Add multiple images for your book. First image will be the main cover.</small>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group">
+                                    <label for="bookFormat" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-book-open" style="color: #2F5D62;"></i> Format</label>
+                                    <select id="bookFormat" class="form-input" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; cursor: pointer; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                        <option value="Paperback">📘 Paperback</option>
+                                        <option value="Hardcover">📕 Hardcover</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookOrigin" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-certificate" style="color: #2F5D62;"></i> Condition</label>
+                                    <select id="bookOrigin" class="form-input" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; cursor: pointer; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                        <option value="Brand New">✨ Brand New</option>
+                                        <option value="Pre-Loved">💚 Pre-Loved</option>
+                                        <option value="Remaindered">📦 Remaindered</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="bookAvailability" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-truck" style="color: #2F5D62;"></i> Availability</label>
+                                <select id="bookAvailability" class="form-input" required style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; cursor: pointer; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                    <option value="On Hand">📦 On Hand - Ready to Ship</option>
+                                    <option value="Pre-Order">⏳ Pre-Order - Coming Soon</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="editionTypeSelect" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-star" style="color: #2F5D62;"></i> Edition</label>
+                                <select id="editionTypeSelect" class="form-input" onchange="toggleSpecialEditionField()" style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; cursor: pointer; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                                    <option value="normal">Normal Edition</option>
+                                    <option value="special">✨ Special Edition</option>
+                                </select>
+                            </div>
+                            
+                            <div id="specialEditionField" style="display: none; margin-bottom: 1.5rem;">
+                                <label for="specialEditionType" style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: block;">Special Edition Details</label>
+                                <input type="text" id="specialEditionType" class="form-input" placeholder="e.g. Illumicrate, Signed, First Edition" style="padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#2F5D62'" onblur="this.style.borderColor='#e2e8f0'">
+                            </div>
+                        </div>
+                        <!-- Right Column -->
+                        <div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-images" style="color: #2F5D62;"></i> Book Images</label>
+                                <div class="image-upload-container" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; min-height: 380px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="image-preview-grid" id="imagePreviewGrid" style="flex: 1; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; min-height: 180px;">
+                                        <div style="text-align: center; color: #94a3b8;">
+                                            <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                                            <p style="margin: 0; font-size: 0.95rem;">No images added yet</p>
+                                        </div>
+                                    </div>
+                                    <div class="image-input-group">
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <input type="file" id="bookImageFile" class="form-input" accept="image/*" multiple style="display: none;" onchange="addImageFile()">
+                                            <label for="bookImageFile" style="flex: 1; padding: 0.75rem; background: white; border: 2px dashed #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; color: #64748b;" onmouseover="this.style.borderColor='#2F5D62'; this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='white'">
+                                                <i class="fas fa-file-upload"></i> Choose Files
+                                            </label>
+                                            <button type="button" onclick="currentBookImages = []; updateImagePreview();" style="padding: 0.75rem 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="Clear all images">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" onclick="closeBookModal()">Cancel</button>
-                        <button type="submit" class="btn-primary">Save Book</button>
+                    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+                        <button type="button" class="btn-secondary" onclick="closeBookModal()" style="padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;">Cancel</button>
+                        <button type="submit" class="btn-primary" id="saveBookBtn" style="padding: 0.75rem 2rem; background: linear-gradient(135deg, #2F5D62, #1F3D40); border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'"><i class="fas fa-save"></i> Save Book</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="../js/auth.js"></script>
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal" id="deleteUserModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-trash-alt"></i> Delete User Account</h2>
+                <button class="close-btn" onclick="closeDeleteUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="security-warning" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-left-color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+                    <div>
+                        <p style="color: #991b1b; margin: 0;"><strong>Warning!</strong></p>
+                        <p style="color: #991b1b; margin: 0.25rem 0 0 0;">This action cannot be undone. Admin authentication required.</p>
+                    </div>
+                </div>
+                <div id="deleteUserInfo" style="background: #f7fafc; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #3b82f6;">
+                    <!-- User info will be displayed here -->
+                </div>
+                <form id="deleteUserForm">
+                    <input type="hidden" id="deleteUserId">
+                    <div class="form-group">
+                        <label for="adminPasswordDelete">Enter Your Admin Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="adminPasswordDelete" class="form-input" placeholder="Enter admin password to confirm" required style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleAdminPasswordDelete" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeDeleteUserModal()">Cancel</button>
+                        <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="fas fa-trash"></i> Delete User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password View Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2><i class="fas fa-lock"></i> View User Password</h2>
+                <button class="close-btn" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="security-warning">
+                    <i class="fas fa-shield-alt"></i>
+                    <p>Admin authentication required to view user password</p>
+                </div>
+                <form id="passwordViewForm">
+                    <input type="hidden" id="viewPasswordUserId">
+                    <div class="form-group">
+                        <label for="adminPassword">Enter Your Admin Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password" required style="padding-right: 45px;">
+                            <i class="fas fa-eye" id="toggleAdminPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                        </div>
+                    </div>
+                    <div id="decryptedPasswordDisplay" style="display: none;">
+                        <div class="decrypted-password-box">
+                            <label>User's Password:</label>
+                            <div class="password-display">
+                                <span id="decryptedPasswordText"></span>
+                                <button type="button" class="btn-copy" onclick="copyPassword()" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-unlock"></i> Decrypt Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/books-data.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/auth-simple.js"></script>
+    <script src="../js/admin.js?v=7"></script>
+    <script src="../js/admin-notifications.js"></script>
+    <script src="../js/storage-manager.js"></script>
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 </body>
 </html>

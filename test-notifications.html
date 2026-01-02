@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification System Test - BookNest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2F5D62;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        
+        .test-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #2F5D62;
+        }
+        
+        .test-section h3 {
+            color: #1e293b;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #2F5D62 0%, #1F3D40 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .btn-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        
+        .status-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .status-box.success {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .notification-demo {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .notification-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Notification System Test</h1>
+        <p class="subtitle">Test buyer notifications to see how they work</p>
+        
+        <div class="info-box">
+            <strong>ℹ️ How to Test:</strong><br>
+            1. Make sure you're logged in as a buyer<br>
+            2. Click any button below to simulate admin actions<br>
+            3. Look for the 🔔 bell icon in the top navbar<br>
+            4. Red badge will show unread count<br>
+            5. Click bell to see notification dropdown
+        </div>
+        
+        <!-- Order Notifications -->
+        <div class="test-section">
+            <h3>📦 Order Notifications</h3>
+            <button class="btn btn-success" onclick="testNotification('confirmed')">
+                <i class="fas fa-check-circle"></i> Test Order Confirmed
+            </button>
+            <button class="btn btn-success" onclick="testNotification('completed')">
+                <i class="fas fa-check-double"></i> Test Order Completed
+            </button>
+            <button class="btn btn-error" onclick="testNotification('cancelled')">
+                <i class="fas fa-times-circle"></i> Test Order Cancelled
+            </button>
+            <button class="btn btn-info" onclick="testNotification('shipped')">
+                <i class="fas fa-shipping-fast"></i> Test Order Shipped
+            </button>
+        </div>
+        
+        <!-- Payment Notifications -->
+        <div class="test-section">
+            <h3>💳 Payment Notifications</h3>
+            <button class="btn btn-success" onclick="testNotification('payment-approved')">
+                <i class="fas fa-check-circle"></i> Test Payment Approved
+            </button>
+            <button class="btn btn-error" onclick="testNotification('payment-rejected')">
+                <i class="fas fa-times-circle"></i> Test Payment Rejected
+            </button>
+        </div>
+        
+        <!-- Support Notifications -->
+        <div class="test-section">
+            <h3>🎫 Support Ticket Notifications</h3>
+            <button class="btn btn-info" onclick="testNotification('ticket-response')">
+                <i class="fas fa-comment"></i> Test Admin Response
+            </button>
+            <button class="btn btn-success" onclick="testNotification('ticket-closed')">
+                <i class="fas fa-check-circle"></i> Test Ticket Closed
+            </button>
+            <button class="btn btn-info" onclick="testNotification('ticket-reopened')">
+                <i class="fas fa-redo"></i> Test Ticket Reopened
+            </button>
+        </div>
+        
+        <div class="status-box" id="statusBox" style="display: none;">
+            <strong id="statusTitle"></strong>
+            <p id="statusMessage"></p>
+        </div>
+        
+        <!-- Notification Preview -->
+        <div class="test-section">
+            <h3>📱 Notification Preview</h3>
+            <div class="notification-demo">
+                <div class="notification-item">
+                    <div class="notification-icon">🚚</div>
+                    <div style="flex: 1;">
+                        <strong>Order Shipped</strong>
+                        <p style="margin: 0.25rem 0; color: #64748b;">Your Order #1767196148777 has been shipped! Tracking Number: JT1234567890</p>
+                        <small style="color: #94a3b8;">Jan 1, 2026 2:30 PM</small>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">✅</div>
+                    <div style="flex: 1;">
+                        <strong>Payment Approved</strong>
+                        <p style="margin: 0.25rem 0; color: #64748b;">Your payment for Order #1767196148777 has been verified.</p>
+                        <small style="color: #94a3b8;">Jan 1, 2026 1:15 PM</small>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">💬</div>
+                    <div style="flex: 1;">
+                        <strong>New Support Response</strong>
+                        <p style="margin: 0.25rem 0; color: #64748b;">Admin responded to your ticket: Order Inquiry</p>
+                        <small style="color: #94a3b8;">Jan 1, 2026 12:45 PM</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem; padding: 1rem; background: #fff7ed; border-radius: 8px; border: 1px solid #fb923c;">
+            <strong>⚠️ Important:</strong> These test notifications will appear in YOUR notification bell. They demonstrate how buyers see notifications when admins take actions.
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="home.html" class="btn btn-info">
+                <i class="fas fa-home"></i> Back to Store
+            </a>
+            <a href="orders.html" class="btn">
+                <i class="fas fa-receipt"></i> View Orders Page
+            </a>
+        </div>
+    </div>
+    
+    <script src="js/auth-simple.js"></script>
+    <script src="js/user-notifications.js"></script>
+    <script>
+        function testNotification(type) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                showStatus('Error', 'Please login first to test notifications!', false);
+                return;
+            }
+            
+            const testOrderId = '1767196148777';
+            const testTrackingNumber = 'JT1234567890';
+            const testTicketSubject = 'Order Inquiry';
+            
+            const notifications = {
+                'confirmed': {
+                    title: '✅ Order Confirmed',
+                    message: `Your Order #${testOrderId} has been confirmed and is being processed!`,
+                    type: 'success'
+                },
+                'completed': {
+                    title: '✅ Order Completed',
+                    message: `Your Order #${testOrderId} has been completed! Thank you for your purchase.`,
+                    type: 'success'
+                },
+                'cancelled': {
+                    title: '❌ Order Cancelled',
+                    message: `Your Order #${testOrderId} has been cancelled. Please contact support if you have questions.`,
+                    type: 'error'
+                },
+                'shipped': {
+                    title: '🚚 Order Shipped',
+                    message: `Your Order #${testOrderId} has been shipped! Tracking Number: ${testTrackingNumber}`,
+                    type: 'info'
+                },
+                'payment-approved': {
+                    title: '✅ Payment Approved',
+                    message: `Your payment for Order #${testOrderId} has been verified. We will process your order shortly.`,
+                    type: 'success'
+                },
+                'payment-rejected': {
+                    title: '❌ Payment Rejected',
+                    message: `Your payment for Order #${testOrderId} was rejected. Reason: Screenshot unclear. Please resubmit.`,
+                    type: 'error'
+                },
+                'ticket-response': {
+                    title: '💬 New Support Response',
+                    message: `Admin responded to your ticket: ${testTicketSubject}`,
+                    type: 'info'
+                },
+                'ticket-closed': {
+                    title: '✅ Ticket Closed',
+                    message: `Your support ticket "${testTicketSubject}" has been closed.`,
+                    type: 'success'
+                },
+                'ticket-reopened': {
+                    title: '🔄 Ticket Reopened',
+                    message: `Your support ticket "${testTicketSubject}" has been reopened.`,
+                    type: 'info'
+                }
+            };
+            
+            const notif = notifications[type];
+            
+            if (!notif) {
+                showStatus('Error', 'Unknown notification type', false);
+                return;
+            }
+            
+            // Add notification
+            const allNotifications = JSON.parse(localStorage.getItem('user_notifications') || '[]');
+            allNotifications.push({
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                title: notif.title,
+                message: notif.message,
+                type: notif.type,
+                date: new Date().toISOString(),
+                read: false
+            });
+            localStorage.setItem('user_notifications', JSON.stringify(allNotifications));
+            
+            // Update badge immediately
+            if (window.userNotificationManager) {
+                window.userNotificationManager.updateBadge();
+            }
+            
+            showStatus('Notification Sent!', `Check the 🔔 bell icon in the navbar. Badge should show +1 unread notification.`, true);
+        }
+        
+        function showStatus(title, message, success) {
+            const statusBox = document.getElementById('statusBox');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            statusTitle.textContent = title;
+            statusMessage.textContent = message;
+            statusBox.className = 'status-box ' + (success ? 'success' : '');
+            statusBox.style.display = 'block';
+            
+            setTimeout(() => {
+                statusBox.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Check if user is logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                const infoBox = document.querySelector('.info-box');
+                infoBox.style.background = '#fee2e2';
+                infoBox.style.borderColor = '#ef4444';
+                infoBox.innerHTML = '<strong>⚠️ Not Logged In:</strong><br>You must be logged in as a buyer to test notifications. Please <a href="pages/login.html">login here</a>.';
+            }
+        });
+    </script>
+</body>
+</html>

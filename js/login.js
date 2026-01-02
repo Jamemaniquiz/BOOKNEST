@@ -118,6 +118,26 @@ async function processGoogleAuth(email, mode) {
         document.getElementById('agreeLogin').disabled = true;
         document.getElementById('loginBtn').disabled = true;
         
+        // Show the verification code
+        const verificationCode = sessionStorage.getItem('testCode_' + email);
+        if (verificationCode) {
+            const codeDisplay = document.createElement('div');
+            codeDisplay.id = 'login-code-display-box';
+            codeDisplay.style.cssText = 'background: #FEF3C7; border: 2px solid #F59E0B; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; text-align: center;';
+            codeDisplay.innerHTML = `
+                <p style="margin: 0 0 0.5rem 0; color: #92400E; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle"></i> Email not sent - Using fallback
+                </p>
+                <p style="margin: 0; font-size: 0.9rem; color: #78350F;">Your verification code is:</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold; color: #B45309; letter-spacing: 0.3rem;">${verificationCode}</p>
+            `;
+            
+            const confirmSection = document.getElementById('confirmation-section');
+            if (confirmSection && !document.getElementById('login-code-display-box')) {
+                confirmSection.insertBefore(codeDisplay, confirmSection.firstChild);
+            }
+        }
+        
         showNotification('Please verify your Gmail with the code sent', 'info');
     } else if (result.message.includes('Admin email')) {
         // Admin email trying to login from buyer page
@@ -130,7 +150,31 @@ async function processGoogleAuth(email, mode) {
         const registerResult = await auth.register(email, name);
         
         if (registerResult.success) {
-            showNotification('Account created! Check your Gmail for the verification code.', 'success');
+            // Get the verification code from sessionStorage
+            const verificationCode = sessionStorage.getItem('testCode_' + email);
+            
+            if (verificationCode) {
+                showNotification('Account created! Your verification code is: ' + verificationCode, 'success', 10000);
+                
+                // Also display code in verification section
+                const codeDisplay = document.createElement('div');
+                codeDisplay.id = 'code-display-box';
+                codeDisplay.style.cssText = 'background: #FEF3C7; border: 2px solid #F59E0B; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; text-align: center;';
+                codeDisplay.innerHTML = `
+                    <p style="margin: 0 0 0.5rem 0; color: #92400E; font-weight: 600;">
+                        <i class="fas fa-exclamation-triangle"></i> Email not sent - Using fallback
+                    </p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #78350F;">Your verification code is:</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold; color: #B45309; letter-spacing: 0.3rem;">${verificationCode}</p>
+                `;
+                
+                const verificationSection = document.getElementById('register-verification-section');
+                if (verificationSection && !document.getElementById('code-display-box')) {
+                    verificationSection.insertBefore(codeDisplay, verificationSection.firstChild);
+                }
+            } else {
+                showNotification('Account created! Check your Gmail for the verification code.', 'success');
+            }
             
             // Show verification section
             document.getElementById('register-inputs-section').style.display = 'none';
@@ -266,16 +310,14 @@ function setupRegisterForm() {
         }
         
         // Show loading state
-        showNotification('Sending verification email...', 'info');
+        showNotification('Creating account...', 'info');
         
         const result = await auth.register(email, name);
         if (result.success) {
-            showNotification('Registration successful! Check your Gmail for the verification code.', 'success');
-            
-            // Hide input section and show verification section
-            document.getElementById('register-inputs-section').style.display = 'none';
-            document.getElementById('register-verification-section').style.display = 'block';
-            document.getElementById('verification-email-display').textContent = email;
+            showNotification('Registration successful! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = '../index.html';
+            }, 1000);
         } else {
             showNotification(result.message, 'error');
         }
@@ -367,7 +409,7 @@ function validateGmailInput(input) {
     }
 }
 
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -389,7 +431,7 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }, duration);
 }
 
 // Add animations
