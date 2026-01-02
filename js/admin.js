@@ -21,6 +21,26 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('booksData', JSON.stringify(currentBooks));
         console.log('✓ Admin initialized localStorage with sample books:', currentBooks.length);
     }
+
+    // === FIRESTORE SYNC ===
+    // Try to load latest data from cloud
+    setTimeout(async () => {
+        if (window.backend && window.backend.useFirestore) {
+            try {
+                const firestoreBooks = await window.backend.load('books');
+                if (firestoreBooks && firestoreBooks.length > 0) {
+                    console.log('✓ Admin loaded books from Firestore:', firestoreBooks.length);
+                    currentBooks = firestoreBooks;
+                    localStorage.setItem('booksData', JSON.stringify(currentBooks));
+                    loadBooksTable(); // Refresh UI
+                    loadOverview();   // Refresh Stats
+                }
+            } catch (e) {
+                console.error('Error syncing with Firestore:', e);
+            }
+        }
+    }, 1000); // Small delay to ensure backend is ready
+    // ======================
     
     initializeAdmin();
     
@@ -983,6 +1003,20 @@ async function handleBookSubmit(e) {
         
         // Force trigger storage event for cross-tab sync
         localStorage.setItem('booksData_timestamp', Date.now().toString());
+
+        // === FIRESTORE SYNC ===
+        if (window.backend && window.backend.useFirestore) {
+            const bookToSave = bookId 
+                ? currentBooks.find(b => b.id === parseInt(bookId))
+                : currentBooks[currentBooks.length - 1];
+            
+            if (bookToSave) {
+                // Ensure ID is string for Firestore
+                await window.backend.save('books', bookToSave, bookToSave.id.toString());
+                console.log('✓ Synced to Firestore:', bookToSave.title);
+            }
+        }
+        // ======================
         
     } catch (e) {
         if (e.name === 'QuotaExceededError') {
@@ -1018,6 +1052,17 @@ async function deleteBook(bookId) {
     currentBooks = currentBooks.filter(b => b.id !== bookId);
     localStorage.setItem('booksData', JSON.stringify(currentBooks));
     
+    // === FIRESTORE SYNC ===
+    if (window.backend && window.backend.useFirestore) {
+        try {
+            await window.backend.delete('books', bookId.toString());
+            console.log('✓ Deleted from Firestore');
+        } catch (e) {
+            console.error('Firestore delete error:', e);
+        }
+    }
+    // ======================
+
     // Trigger custom event for same-tab updates on buyer side
     window.dispatchEvent(new CustomEvent('booksUpdated', {
         detail: { books: currentBooks }
