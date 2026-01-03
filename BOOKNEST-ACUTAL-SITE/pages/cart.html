@@ -364,8 +364,56 @@
     <script src="../js/books-data.js"></script>
     <script src="../js/auth-simple.js"></script>
     <script src="../js/ticket-notifications.js"></script>
-    <script src="../js/cart.js?v=12"></script>
+    <script src="../js/cart.js?v=13"></script>
     <script src="../js/main.js"></script>
+    <script>
+        // EMERGENCY AUTO-FIX SCRIPT
+        // This script detects if the badge shows items but the cart is empty, and forces a reset
+        (function() {
+            console.log('🔧 Auto-fixer loaded');
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (attempts > 10) clearInterval(checkInterval);
+
+                const badge = document.querySelector('.cart-badge');
+                const emptyMsg = document.querySelector('.cart-empty');
+                
+                // If we see an empty cart message BUT the badge says we have items...
+                if (badge && emptyMsg) {
+                    const count = parseInt(badge.textContent || '0');
+                    if (count > 0) {
+                        console.log('⚠️ Detected Ghost Cart State! Auto-correcting...');
+                        
+                        // 1. Visually fix badge immediately
+                        const allBadges = document.querySelectorAll('.cart-badge');
+                        allBadges.forEach(b => b.textContent = '0');
+                        
+                        // 2. Nuke all possible storage keys
+                        localStorage.removeItem('cart');
+                        localStorage.removeItem('cart_guest');
+                        
+                        // 3. Try to find user ID and nuke that too
+                        try {
+                            const user = JSON.parse(localStorage.getItem('booknest_current_user'));
+                            if (user && user.id) {
+                                localStorage.removeItem(`cart_${user.id}`);
+                                console.log(`Deleted cart_${user.id}`);
+                            }
+                        } catch(e) {}
+                        
+                        // 4. Reset manager if it exists
+                        if (window.cartManager) {
+                            window.cartManager.cart = [];
+                            window.cartManager.updateCartBadge();
+                        }
+                        
+                        clearInterval(checkInterval);
+                    }
+                }
+            }, 500);
+        })();
+    </script>
     <script>
         // Wait for cart manager to be ready
         document.addEventListener('DOMContentLoaded', async function() {
