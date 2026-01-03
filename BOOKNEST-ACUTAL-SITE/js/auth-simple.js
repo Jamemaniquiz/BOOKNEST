@@ -277,26 +277,36 @@ Verification Code: ${code}
             try {
                 // Save as individual document using ID
                 console.log('Saving new user to Firestore:', newUser.id);
-                const result = await window.backend.save('users', newUser, newUser.id);
-                if (!result.success) {
-                    console.error('Failed to save user to Firestore:', result.error);
-                    // Fallback to local storage if Firestore fails
-                    users.push(newUser);
-                    localStorage.setItem('users', JSON.stringify(users));
-                } else {
+                
+                // FORCE CLOUD SAVE: Do not allow fallback if we are online
+                if (navigator.onLine) {
+                    const result = await window.backend.save('users', newUser, newUser.id);
+                    if (!result.success) {
+                        console.error('Failed to save user to Firestore:', result.error);
+                        return { success: false, message: 'Registration failed: Could not save to cloud database. Please try again.' };
+                    }
                     console.log('User saved successfully to Firestore');
-                    // Also save to local storage as backup/cache
+                } else {
+                    // Only fallback if genuinely offline
+                    console.warn('Offline: Saving locally only');
                     users.push(newUser);
                     localStorage.setItem('users', JSON.stringify(users));
                 }
+                
+                // Also save to local storage as backup/cache (always do this for performance)
+                // But only AFTER successful cloud save (or if offline)
+                const currentLocal = JSON.parse(localStorage.getItem('users') || '[]');
+                if (!currentLocal.find(u => u.id === newUser.id)) {
+                    currentLocal.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(currentLocal));
+                }
+
             } catch (e) {
                 console.error('Exception saving user to Firestore:', e);
-                // Fallback to local storage
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
+                return { success: false, message: 'Registration error: ' + e.message };
             }
         } else {
-            // Fallback to local storage array
+            // Fallback to local storage array ONLY if backend is completely missing
             users.push(newUser);
             localStorage.setItem('users', JSON.stringify(users));
             // Keep legacy sync

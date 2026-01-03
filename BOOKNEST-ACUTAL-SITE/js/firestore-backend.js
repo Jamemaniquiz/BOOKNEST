@@ -6,7 +6,16 @@ class FirestoreBackend {
         this.db = window.firebaseDB;
         this.auth = window.firebaseAuth;
         this.isOnline = navigator.onLine;
-        this.useFirestore = this.db && this.auth;
+        
+        // Dynamic check property
+        Object.defineProperty(this, 'useFirestore', {
+            get: function() {
+                // Always re-check global window objects in case they initialized late
+                if (!this.db && window.firebaseDB) this.db = window.firebaseDB;
+                if (!this.auth && window.firebaseAuth) this.auth = window.firebaseAuth;
+                return !!(this.db && this.auth);
+            }
+        });
         
         // Listen for online/offline status
         window.addEventListener('online', () => {
@@ -20,10 +29,11 @@ class FirestoreBackend {
             console.log('📴 Offline - using localStorage');
         });
 
+        // Initial check
         if (this.useFirestore) {
             console.log('🔥 Firestore backend enabled - unlimited storage!');
         } else {
-            console.log('📦 Firestore not configured - using localStorage (5MB limit)');
+            console.log('📦 Firestore not configured (yet) - using localStorage (5MB limit)');
         }
     }
 
