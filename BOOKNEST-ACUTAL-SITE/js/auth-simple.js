@@ -280,11 +280,20 @@ Verification Code: ${code}
                 const result = await window.backend.save('users', newUser, newUser.id);
                 if (!result.success) {
                     console.error('Failed to save user to Firestore:', result.error);
+                    // Fallback to local storage if Firestore fails
+                    users.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(users));
                 } else {
                     console.log('User saved successfully to Firestore');
+                    // Also save to local storage as backup/cache
+                    users.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(users));
                 }
             } catch (e) {
                 console.error('Exception saving user to Firestore:', e);
+                // Fallback to local storage
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
             }
         } else {
             // Fallback to local storage array

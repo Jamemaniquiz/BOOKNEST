@@ -27,6 +27,20 @@ function initializeApp() {
              }
         }
     } catch (e) { console.error('Badge fix failed', e); }
+
+    // AUTO-SYNC: Ensure current user is in Firestore
+    setTimeout(async () => {
+        if (auth.isLoggedIn() && window.backend) {
+            const user = auth.currentUser;
+            if (user && user.id && !user.id.startsWith('guest_')) {
+                console.log('🔄 Auto-syncing current user to cloud...');
+                try {
+                    await window.backend.save('users', user, user.id);
+                    console.log('✅ User synced to cloud.');
+                } catch (e) { console.error('Auto-sync failed', e); }
+            }
+        }
+    }, 3000); // Wait 3s for backend to init
     
     // Setup event listeners
     setupEventListeners();
