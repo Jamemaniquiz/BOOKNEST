@@ -347,6 +347,12 @@
             <div class="cart-header">
                 <i class="fas fa-shopping-cart" style="color: #2F5D62; font-size: 2rem;"></i>
                 <h1>Shopping Cart</h1>
+                <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                    <span style="font-size: 12px; color: #888;">v12.0</span>
+                    <button onclick="forceResetCart()" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        <i class="fas fa-sync"></i> Fix Cart
+                    </button>
+                </div>
             </div>
 
             <div id="cartContent">
@@ -358,7 +364,7 @@
     <script src="../js/books-data.js"></script>
     <script src="../js/auth-simple.js"></script>
     <script src="../js/ticket-notifications.js"></script>
-    <script src="../js/cart.js?v=11"></script>
+    <script src="../js/cart.js?v=12"></script>
     <script src="../js/main.js"></script>
     <script>
         // Wait for cart manager to be ready
@@ -396,6 +402,20 @@
 
         // Expose displayCart to window so cart.js can call it
         window.displayCart = displayCart;
+
+        // Global Reset Function
+        window.forceResetCart = function() {
+            if(confirm('This will clear your cart and reset the database connection. Continue?')) {
+                localStorage.removeItem('cart');
+                localStorage.removeItem('cart_guest');
+                if (auth.getCurrentUser()) {
+                    localStorage.removeItem(`cart_${auth.getCurrentUser().id}`);
+                }
+                cartManager.cart = [];
+                cartManager.updateCartBadge();
+                location.reload();
+            }
+        };
 
         function displayCart() {
             console.log('🛒 displayCart called');
