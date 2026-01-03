@@ -12,6 +12,21 @@ function initializeApp() {
     
     // Update cart badge
     cartManager.updateCartBadge();
+
+    // FORCE FIX: Check for ghost cart items
+    try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const badge = document.querySelector('.cart-badge');
+        // If cart is empty but badge shows numbers, or if cart-count is wrong
+        if (cart.length === 0) {
+             if (badge && (badge.textContent !== '0' && badge.textContent !== '')) {
+                console.log('👻 Ghost Cart Detected! Badge says ' + badge.textContent + ' but cart is empty. Fixing...');
+                badge.textContent = '0';
+                badge.style.display = 'none';
+                localStorage.setItem('cart-count', '0');
+             }
+        }
+    } catch (e) { console.error('Badge fix failed', e); }
     
     // Setup event listeners
     setupEventListeners();

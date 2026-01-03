@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'admin-login.html';
         return;
     }
+
+    // Auto-sync local users to Firestore to ensure cross-browser visibility
+    syncLocalUsersToFirestore();
     
     // Load books from localStorage FIRST - single source of truth
     const storedBooks = localStorage.getItem('booksData');
@@ -2819,3 +2822,54 @@ async function viewInvoice(orderId) {
 }
 
 window.viewInvoice = viewInvoice;
+
+// --- SYNC UTILITY ---
+async function syncLocalUsersToFirestore() {
+    if (!window.backend) {
+        console.log('Backend not ready for sync');
+        return;
+    }
+    
+    console.log('🔄 Starting User Sync...');
+    
+    // 1. Get local users
+    const localUsers = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+    const legacyUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // Merge lists, preferring booknest_users
+    const allLocalUsers = [...localUsers];
+    legacyUsers.forEach(u => {
+        if (!allLocalUsers.find(existing => existing.email === u.email)) {
+            allLocalUsers.push(u);
+        }
+    });
+
+    if (allLocalUsers.length === 0) {
+        console.log('No local users to sync.');
+        return;
+    }
+
+    // 2. Sync each to Firestore
+    let syncedCount = 0;
+    for (const user of allLocalUsers) {
+        // Skip guest users or invalid users
+        if (!user.id || user.id.startsWith('guest_')) continue;
+
+        try {
+            // Check if exists first (optional, but save() usually overwrites which is fine)
+            await window.backend.save('users', user, user.id);
+            syncedCount++;
+        } catch (e) {
+            console.error('Failed to sync user:', user.email, e);
+        }
+    }
+    
+    if (syncedCount > 0) {
+        console.log(`✅ Successfully synced ${syncedCount} users to Firestore.`);
+        // Refresh table if we are on the users section
+        const currentSection = document.querySelector('.dashboard-section.active');
+        if (currentSection && currentSection.id === 'users-section') {
+            loadUsersTable();
+        }
+    }
+}
