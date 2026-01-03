@@ -32,6 +32,7 @@ class CartManager {
     }
 
     async initCart() {
+        console.log('🚀 CartManager v11 Initializing...');
         try {
             const storageKey = this.getStorageKey();
             // FAST PATH: Load directly from localStorage first to unblock UI
