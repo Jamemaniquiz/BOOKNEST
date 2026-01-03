@@ -319,11 +319,42 @@ Verification Code: ${code}
             return { success: false, message: 'Please use a valid Gmail address (@gmail.com)' };
         }
 
-        // Get all users
-        const users = await this.getAllUsers();
+        let user = null;
 
-        // Find user
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        // 1. Try Direct Firestore Query (Best for cross-browser)
+        if (window.backend && window.backend.db && navigator.onLine) {
+            try {
+                console.log('🔍 Auth: Querying Firestore for email:', email);
+                // Try exact match first
+                let snapshot = await window.backend.db.collection('users')
+                    .where('email', '==', email)
+                    .get();
+                
+                if (snapshot.empty) {
+                    // Try lowercase match if exact failed (in case stored as lowercase)
+                    snapshot = await window.backend.db.collection('users')
+                        .where('email', '==', email.toLowerCase())
+                        .get();
+                }
+
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    user = { id: doc.id, ...doc.data() };
+                    console.log('✅ Auth: User found in Firestore via query.');
+                } else {
+                    console.log('⚠️ Auth: User not found in Firestore via query.');
+                }
+            } catch (e) {
+                console.error('Auth: Firestore query failed', e);
+            }
+        }
+
+        // 2. Fallback to getAllUsers (Legacy/Offline)
+        if (!user) {
+             console.log('🔍 Auth: Falling back to getAllUsers...');
+             const users = await this.getAllUsers();
+             user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        }
         
         if (!user) {
             return { success: false, message: 'Gmail not found. Please sign up first.' };
