@@ -358,11 +358,11 @@
     <script src="../js/books-data.js"></script>
     <script src="../js/auth-simple.js"></script>
     <script src="../js/ticket-notifications.js"></script>
-    <script src="../js/cart.js?v=5"></script>
+    <script src="../js/cart.js?v=10"></script>
     <script src="../js/main.js"></script>
     <script>
         // Wait for cart manager to be ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Check if logged in
             if (!auth.isLoggedIn()) {
                 alert('Please login to view your cart');
@@ -375,6 +375,17 @@
                 updateAuthUI();
             }
 
+            // Show loading state
+            const cartContent = document.getElementById('cartContent');
+            if (cartContent) {
+                cartContent.innerHTML = '<div style="text-align:center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #2F5D62;"></i><p>Loading cart...</p></div>';
+            }
+
+            // Wait for cart to initialize
+            if (cartManager && cartManager.initPromise) {
+                await cartManager.initPromise;
+            }
+
             displayCart();
             
             // Ensure cart manager is initialized
@@ -383,11 +394,18 @@
             }
         });
 
-        function displayCart() {
-            const cart = cartManager.getCart();
-            const cartContent = document.getElementById('cartContent');
+        // Expose displayCart to window so cart.js can call it
+        window.displayCart = displayCart;
 
-            if (cart.length === 0) {
+        function displayCart() {
+            console.log('🛒 displayCart called');
+            const cart = cartManager.getCart();
+            console.log('🛒 Cart items:', cart);
+            
+            const cartContent = document.getElementById('cartContent');
+            if (!cartContent) return;
+
+            if (!cart || cart.length === 0) {
                 cartContent.innerHTML = `
                     <div class="cart-empty">
                         <i class="fas fa-shopping-cart"></i>
@@ -401,42 +419,49 @@
                 return;
             }
 
-            const cartItemsHTML = cart.map(item => `
-                <div class="cart-item">
-                    <img src="${item.image}" alt="${item.title}">
-                    <div class="cart-item-details">
-                        <div class="cart-item-title">${item.title}</div>
-                        <div class="cart-item-price">PHP ${item.price.toFixed(2)}</div>
+            try {
+                const cartItemsHTML = cart.map(item => {
+                    // Robust price handling
+                    let price = item.price;
+                    if (typeof price === 'string') price = parseFloat(price);
+                    if (isNaN(price)) price = 0;
+                    
+                    return `
+                    <div class="cart-item">
+                        <img src="${item.image || '../images/placeholder.jpg'}" alt="${item.title || 'Book'}" onerror="this.src='../images/placeholder.jpg'">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.title || 'Untitled Book'}</div>
+                            <div class="cart-item-price">PHP ${price.toFixed(2)}</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="remove-btn" onclick="removeItem(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="cart-item-controls">
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="quantity-display">${item.quantity}</span>
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button class="remove-btn" onclick="removeItem(${item.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `}).join('');
 
-            cartContent.innerHTML = `
-                <div class="cart-items">
-                    ${cartItemsHTML}
-                </div>
-                <div class="cart-summary">
-                    <div class="cart-total">
-                        <span>Total:</span>
-                        <span class="cart-total-price">PHP ${cartManager.getTotal().toFixed(2)}</span>
+                cartContent.innerHTML = `
+                    <div class="cart-items">
+                        ${cartItemsHTML}
                     </div>
-                    <div class="cart-actions">
-                        <button class="btn-continue" onclick="window.location.href='../home.html'">
-                            <i class="fas fa-arrow-left"></i> Continue Shopping
-                        </button>
-                        <button class="btn-checkout" onclick="handleCheckout()">
+                    <div class="cart-summary">
+                        <div class="cart-total">
+                            <span>Total:</span>
+                            <span class="cart-total-price">PHP ${cartManager.getTotal().toFixed(2)}</span>
+                        </div>
+                        <div class="cart-actions">
+                            <button class="btn-continue" onclick="window.location.href='../home.html'">
+                                <i class="fas fa-arrow-left"></i> Continue Shopping
+                            </button>
+                            <button class="btn-checkout" onclick="handleCheckout()">
                             <i class="fas fa-credit-card"></i> Proceed to Checkout
                         </button>
                     </div>

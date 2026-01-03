@@ -29,12 +29,26 @@ class FirestoreBackend {
 
     // Get current user ID (for user-specific data)
     getUserId() {
+        // 1. Check for SimpleAuth user (localStorage)
+        try {
+            const simpleUserJson = localStorage.getItem('booknest_current_user');
+            if (simpleUserJson) {
+                const simpleUser = JSON.parse(simpleUserJson);
+                if (simpleUser && simpleUser.id) {
+                    return simpleUser.id;
+                }
+            }
+        } catch (e) {
+            console.warn('Error reading SimpleAuth user:', e);
+        }
+
+        // 2. Check for Firebase Auth user
         const currentUser = this.auth?.currentUser;
         if (currentUser) {
             return currentUser.uid;
         }
         
-        // Create anonymous ID for guests
+        // 3. Fallback to Guest ID
         let guestId = localStorage.getItem('guestUserId');
         if (!guestId) {
             guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -221,7 +235,20 @@ class FirestoreBackend {
         const result = await this.load('cart');
         if (Array.isArray(result)) {
             const cartDoc = result.find(doc => doc.id === 'current');
-            return cartDoc?.items || [];
+            if (cartDoc && cartDoc.items) {
+                return cartDoc.items;
+            }
+            
+            // Fallback: Check if it's the old format (direct array of items)
+            // If the first item has 'title' or 'price' and NOT 'items', it's likely the old format
+            if (result.length > 0 && (result[0].title || result[0].price) && !result[0].items) {
+                console.log('⚠️ Detected legacy cart format in localStorage, migrating...');
+                // Auto-migrate to new format
+                await this.saveCart(result);
+                return result;
+            }
+            
+            return [];
         }
         return result;
     }

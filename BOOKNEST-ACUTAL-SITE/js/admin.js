@@ -390,9 +390,9 @@ function loadOverview() {
     loadRecentOrders();
 }
 
-function loadRecentOrders() {
+async function loadRecentOrders() {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const recentOrders = orders.slice(-5).reverse();
     
     const container = document.getElementById('recentOrdersList');
@@ -475,10 +475,10 @@ function loadBooksTable(searchTerm = '') {
     `).join('');
 }
 
-function loadOrdersTable(searchTerm = '') {
+async function loadOrdersTable(searchTerm = '') {
     const tbody = document.getElementById('ordersTableBody');
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const statusFilter = document.getElementById('filterOrderStatus') ? document.getElementById('filterOrderStatus').value : '';
     
     console.log('📦 Loading Orders:', orders.length, 'orders found');
@@ -670,9 +670,9 @@ function loadOrdersTable(searchTerm = '') {
     }).join('');
 }
 
-function exportOrdersToExcel() {
+async function exportOrdersToExcel() {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const statusFilter = document.getElementById('filterOrderStatus') ? document.getElementById('filterOrderStatus').value : '';
     
     // Filter orders same as table
@@ -736,9 +736,9 @@ function exportOrdersToExcel() {
     document.body.removeChild(link);
 }
 
-function loadUsersTable(searchTerm = '') {
+async function loadUsersTable(searchTerm = '') {
     const tbody = document.getElementById('usersTableBody');
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     
     console.log('👥 Loading Users:', users.length, 'total users');
     
@@ -1033,7 +1033,7 @@ async function deleteBook(bookId) {
 async function viewOrderDetails(orderId) {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     const order = orders.find(o => o.id === orderId);
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const user = users.find(u => u.id === order.userId);
     
     if (!order) return;
@@ -1373,7 +1373,7 @@ async function confirmDeleteUser() {
     
     // Verify admin password
     const currentAdmin = auth.getCurrentUser();
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const admin = users.find(u => u.id === currentAdmin.id);
     
     // Get user info for confirmation
@@ -1523,7 +1523,7 @@ async function decryptUserPassword() {
     
     // Verify admin password
     const currentAdmin = auth.getCurrentUser();
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const admin = users.find(u => u.id === currentAdmin.id);
     
     // Check if this is the verified Gmail admin (case-insensitive)
@@ -1658,9 +1658,9 @@ function showNewOrderNotification() {
     loadNotifications();
 }
 
-function loadNotifications() {
+async function loadNotifications() {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const tickets = JSON.parse(localStorage.getItem('customerServiceTickets') || '[]');
     
     // Get admin's last checked time
@@ -1989,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Payment Verification System
-function viewPaymentProof(orderId) {
+async function viewPaymentProof(orderId) {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     const order = orders.find(o => o.id == orderId);
     
@@ -1998,7 +1998,7 @@ function viewPaymentProof(orderId) {
         return;
     }
     
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const user = users.find(u => u.id === order.userId);
     
     const modal = document.createElement('div');
@@ -2390,7 +2390,7 @@ function toggleMobileSidebar() {
     }
 }
 
-function viewInvoice(orderId) {
+async function viewInvoice(orderId) {
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     const order = orders.find(o => o.id === orderId);
     
@@ -2400,7 +2400,7 @@ function viewInvoice(orderId) {
     }
     
     // Get user info
-    const users = auth.getAllUsers();
+    const users = await auth.getAllUsers();
     const user = users.find(u => u.id === order.userId);
     
     // Create invoice view

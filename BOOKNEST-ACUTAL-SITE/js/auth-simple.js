@@ -30,6 +30,19 @@ if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.PUBLIC_KEY !== 'YOUR_PUBLIC
 class SimpleAuth {
     constructor() {
         this.currentUser = this.loadUser();
+        this.migrateData();
+    }
+
+    migrateData() {
+        // Migrate from legacy 'booknest_users' to standard 'users' collection
+        const legacyUsers = localStorage.getItem('booknest_users');
+        const newUsers = localStorage.getItem('users');
+        
+        if (legacyUsers && !newUsers) {
+            console.log('Migrating legacy users to new structure...');
+            localStorage.setItem('users', legacyUsers);
+            // Keep legacy for safety, or remove it? Keep for now.
+        }
     }
 
     loadUser() {
@@ -215,7 +228,7 @@ Verification Code: ${code}
         return { success: false, message: 'Invalid verification code.' };
     }
 
-    register(email, name, password, phone = null, facebookAccount = null, address = null) {
+    async register(email, name, password, phone = null, facebookAccount = null, address = null) {
         if (!this.isValidGmail(email)) {
             return { success: false, message: 'Please use a valid Gmail address (@gmail.com)' };
         }
@@ -230,8 +243,8 @@ Verification Code: ${code}
             };
         }
 
-        // Get all users from localStorage
-        const users = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+        // Get all users
+        const users = await this.getAllUsers();
         
         // Debug: Log all emails in system
         console.log('Checking registration for:', email);
@@ -259,8 +272,27 @@ Verification Code: ${code}
             createdAt: new Date().toISOString()
         };
 
-        users.push(newUser);
-        localStorage.setItem('booknest_users', JSON.stringify(users));
+        // Save to backend (Firestore 'users' collection)
+        if (window.backend) {
+            try {
+                // Save as individual document using ID
+                console.log('Saving new user to Firestore:', newUser.id);
+                const result = await window.backend.save('users', newUser, newUser.id);
+                if (!result.success) {
+                    console.error('Failed to save user to Firestore:', result.error);
+                } else {
+                    console.log('User saved successfully to Firestore');
+                }
+            } catch (e) {
+                console.error('Exception saving user to Firestore:', e);
+            }
+        } else {
+            // Fallback to local storage array
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            // Keep legacy sync
+            localStorage.setItem('booknest_users', JSON.stringify(users));
+        }
         
         // Trigger event for real-time sync across tabs
         localStorage.setItem('booknest_user_updated', Date.now().toString());
@@ -273,13 +305,13 @@ Verification Code: ${code}
         return { success: true, user: newUser, message: 'Account created successfully!' };
     }
 
-    login(email, password) {
+    async login(email, password) {
         if (!this.isValidGmail(email)) {
             return { success: false, message: 'Please use a valid Gmail address (@gmail.com)' };
         }
 
         // Get all users
-        const users = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+        const users = await this.getAllUsers();
 
         // Find user
         const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -306,9 +338,20 @@ Verification Code: ${code}
     }
 
     logout() {
+        // Clear user-specific data before removing user session
+        if (this.currentUser) {
+            // We don't necessarily want to DELETE the data (so it's there when they return)
+            // But we want to ensure the next user doesn't see it.
+            // Since we are now using namespaced keys (cart_USERID), this is handled automatically.
+            // However, we should clear the legacy 'cart' and 'wishlist' keys just in case.
+            localStorage.removeItem('cart');
+            localStorage.removeItem('wishlist');
+        }
+
         this.currentUser = null;
         localStorage.removeItem('currentUser');
         localStorage.removeItem('booknest_current_user');
+        
         return { success: true, message: 'Logged out successfully' };
     }
 
@@ -328,11 +371,24 @@ Verification Code: ${code}
         return this.currentUser;
     }
 
-    getAllUsers() {
-        return JSON.parse(localStorage.getItem('booknest_users') || '[]');
+    async getAllUsers() {
+        if (window.backend) {
+            try {
+                // Use standard 'users' collection which maps to Firestore 'users' collection
+                const allDocs = await window.backend.load('users');
+                // Filter out guest documents (which start with 'guest_')
+                // Guest documents are created by cart/order logic for non-logged-in users
+                // We only want registered users here
+                return allDocs.filter(doc => doc.id && !doc.id.startsWith('guest_'));
+            } catch (e) {
+                console.warn('Backend load failed, falling back to local', e);
+            }
+        }
+        // Fallback to local storage 'users' key (migrated from booknest_users)
+        return JSON.parse(localStorage.getItem('users') || localStorage.getItem('booknest_users') || '[]');
     }
 
-    updateUserProfile(updatedData) {
+    async updateUserProfile(updatedData) {
         try {
             if (!this.currentUser) {
                 console.error('No user logged in');
@@ -340,7 +396,7 @@ Verification Code: ${code}
             }
 
             // Get all users
-            const users = this.getAllUsers();
+            const users = await this.getAllUsers();
             const userIndex = users.findIndex(u => u.id === this.currentUser.id);
 
             if (userIndex === -1) {
@@ -349,17 +405,24 @@ Verification Code: ${code}
             }
 
             // Update user data (only allow certain fields to be updated)
-            users[userIndex] = {
+            const updatedUser = {
                 ...users[userIndex],
                 name: updatedData.name !== undefined ? updatedData.name : users[userIndex].name,
                 phone: updatedData.phone !== undefined ? updatedData.phone : users[userIndex].phone,
                 facebookAccount: updatedData.facebookAccount !== undefined ? updatedData.facebookAccount : users[userIndex].facebookAccount,
                 address: updatedData.address !== undefined ? updatedData.address : users[userIndex].address
             };
+            
+            users[userIndex] = updatedUser;
 
-            // Save to localStorage
-            localStorage.setItem('booknest_users', JSON.stringify(users));
-            console.log('✓ User data saved to localStorage:', users[userIndex]);
+            // Save to storage
+            if (window.backend) {
+                await window.backend.save('users', updatedUser, updatedUser.id);
+            } else {
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('booknest_users', JSON.stringify(users));
+            }
+            console.log('✓ User data saved:', users[userIndex]);
 
             // Update current user
             this.currentUser = users[userIndex];
@@ -384,9 +447,9 @@ Verification Code: ${code}
         }
     }
 
-    deleteUser(userId) {
+    async deleteUser(userId) {
         try {
-            const users = this.getAllUsers();
+            const users = await this.getAllUsers();
             const initialLength = users.length;
             
             // Find the user to be deleted
@@ -405,8 +468,13 @@ Verification Code: ${code}
                 return false;
             }
             
-            // Save to localStorage
-            localStorage.setItem('booknest_users', JSON.stringify(filteredUsers));
+            // Save to storage
+            if (window.backend) {
+                await window.backend.delete('users', userId);
+            } else {
+                localStorage.setItem('users', JSON.stringify(filteredUsers));
+                localStorage.setItem('booknest_users', JSON.stringify(filteredUsers));
+            }
             
             // IMPORTANT: Check if the deleted user is currently logged in
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');

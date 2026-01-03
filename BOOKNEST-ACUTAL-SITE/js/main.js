@@ -1549,15 +1549,28 @@ window.viewMyOrders = viewMyOrders;
 
 // Wishlist System
 const wishlistManager = {
+    getStorageKey: function() {
+        try {
+            const user = window.auth ? window.auth.getCurrentUser() : null;
+            if (user) {
+                return `wishlist_${user.id}`;
+            }
+            return 'wishlist_guest';
+        } catch (e) {
+            return 'wishlist_guest';
+        }
+    },
+
     getWishlist: function() {
-        return JSON.parse(localStorage.getItem('wishlist') || '[]');
+        const key = this.getStorageKey();
+        return JSON.parse(localStorage.getItem(key) || '[]');
     },
     
     addToWishlist: function(bookId) {
         const wishlist = this.getWishlist();
         if (!wishlist.includes(bookId)) {
             wishlist.push(bookId);
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            localStorage.setItem(this.getStorageKey(), JSON.stringify(wishlist));
             this.updateBadge();
             this.updateHeartIcon(bookId, true);
             CustomModal.show({
@@ -1572,7 +1585,7 @@ const wishlistManager = {
     removeFromWishlist: function(bookId) {
         let wishlist = this.getWishlist();
         wishlist = wishlist.filter(id => id !== bookId);
-        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(wishlist));
         this.updateBadge();
         this.updateHeartIcon(bookId, false);
         // If modal is open, refresh it

@@ -357,12 +357,23 @@
 
         // Get current admin user
         const currentAdmin = auth.getCurrentUser();
-        const users = auth.getAllUsers();
-        
-        // Try to find in all users by ID (loose check) or Email
-        const adminUser = users.find(u => u.id == currentAdmin.id) || 
-                          users.find(u => u.email === currentAdmin.email) || 
-                          currentAdmin;
+        let adminUser = currentAdmin; // Default to session user
+        let allUsers = []; // Store all users
+
+        // Load users asynchronously
+        (async () => {
+            try {
+                allUsers = await auth.getAllUsers();
+                // Try to find in all users by ID (loose check) or Email
+                const foundUser = allUsers.find(u => u.id == currentAdmin.id) || 
+                                  allUsers.find(u => u.email === currentAdmin.email);
+                if (foundUser) {
+                    adminUser = foundUser;
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        })();
 
         // Display email
         const emailDisplay = document.querySelector('.profile-header p');
@@ -403,7 +414,7 @@
         });
 
         // Change password
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const currentPasswordInput = document.getElementById('currentPassword').value;
@@ -458,14 +469,30 @@
             localStorage.setItem('adminPassword', newPassword);
 
             // Update password in users array if exists
-            const users = auth.getAllUsers();
-            const userIndex = users.findIndex(u => u.id == currentAdmin.id || u.email === currentAdmin.email);
-            
-            const encodedPassword = btoa(newPassword);
+            try {
+                const users = await auth.getAllUsers();
+                const userIndex = users.findIndex(u => u.id == currentAdmin.id || u.email === currentAdmin.email);
+                
+                const encodedPassword = btoa(newPassword);
 
-            if (userIndex !== -1) {
-                users[userIndex].password = encodedPassword; // Encode password
-                localStorage.setItem('booknest_users', JSON.stringify(users));
+                if (userIndex !== -1) {
+                    users[userIndex].password = encodedPassword; // Encode password
+                    
+                    if (window.backend) {
+                        await window.backend.save('booknest_users', users);
+                    } else {
+                        localStorage.setItem('booknest_users', JSON.stringify(users));
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating password in database:', error);
+                // Fallback to local storage if backend fails
+                const users = JSON.parse(localStorage.getItem('booknest_users') || '[]');
+                const userIndex = users.findIndex(u => u.id == currentAdmin.id || u.email === currentAdmin.email);
+                if (userIndex !== -1) {
+                    users[userIndex].password = btoa(newPassword);
+                    localStorage.setItem('booknest_users', JSON.stringify(users));
+                }
             }
 
             // Update current session user too

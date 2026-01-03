@@ -59,7 +59,7 @@ function setupLoginForm() {
         validateGmailInput(this);
     });
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const email = emailInput.value.trim();
@@ -75,7 +75,7 @@ function setupLoginForm() {
             return;
         }
 
-        const result = auth.login(email, password);
+        const result = await auth.login(email, password);
 
         if (result.success) {
             showNotification('Login successful! Redirecting...', 'success');
@@ -154,7 +154,7 @@ function setupRegisterForm() {
         }
 
         // Direct registration (Verification removed as requested)
-        const result = auth.register(email, name, password, phone);
+        const result = await auth.register(email, name, password, phone);
 
         if (result.success) {
             showNotification('Account created successfully! Redirecting...', 'success');

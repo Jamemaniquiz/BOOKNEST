@@ -2,27 +2,147 @@
 class CartManager {
     constructor() {
         this.cart = [];
-        this.initPromise = this.initCart();
+        // Wait for DOMContentLoaded to ensure auth is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initPromise = this.initCart();
+            });
+        } else {
+            this.initPromise = this.initCart();
+        }
+    }
+
+    getStorageKey() {
+        try {
+            // Double check auth if window.auth is available
+            const user = window.auth ? window.auth.getCurrentUser() : null;
+            
+            // Debug log to see what's happening
+            if (user) {
+                console.log('🛒 CartManager: Using user cart:', user.id);
+                return `cart_${user.id}`;
+            } else {
+                console.log('🛒 CartManager: Using guest cart');
+                return 'cart_guest';
+            }
+        } catch (e) {
+            console.error('Error getting storage key:', e);
+            return 'cart_guest';
+        }
     }
 
     async initCart() {
         try {
-            this.cart = await this.loadCart();
-            console.log('🛒 Cart initialized with', this.cart.length, 'items');
+            const storageKey = this.getStorageKey();
+            // FAST PATH: Load directly from localStorage first to unblock UI
+            let loaded = false;
+            
+            // Try using backend helper if available
+            if (window.backend && typeof window.backend.loadFromLocalStorage === 'function') {
+                try {
+                    const cached = window.backend.loadFromLocalStorage(storageKey);
+                    if (Array.isArray(cached)) {
+                        const cartDoc = cached.find(doc => doc.id === 'current');
+                        if (cartDoc && cartDoc.items) {
+                            this.cart = cartDoc.items;
+                        } else if (cached.length > 0 && (cached[0].title || cached[0].price) && !cached[0].items) {
+                            this.cart = cached;
+                        } else {
+                            this.cart = [];
+                        }
+                        loaded = true;
+                    }
+                } catch (e) { console.warn('Backend local load failed', e); }
+            } 
+            
+            // Fallback to raw localStorage if backend helper missing or failed
+            if (!loaded) {
+                try {
+                    const raw = localStorage.getItem(storageKey);
+                    console.log(`🔍 Reading from localStorage key: ${storageKey}`);
+                    console.log(`📦 Raw data length: ${raw ? raw.length : 0} chars`);
+                    
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        console.log(`📦 Parsed data type: ${Array.isArray(parsed) ? 'Array' : typeof parsed}`);
+                        console.log(`📦 Parsed data:`, parsed);
+                        
+                        if (Array.isArray(parsed)) {
+                             // Handle Firestore structure in localStorage
+                             const cartDoc = parsed.find(doc => doc.id === 'current');
+                             this.cart = cartDoc ? (cartDoc.items || []) : parsed;
+                        } else if (parsed && parsed.items && Array.isArray(parsed.items)) {
+                             // Handle wrapped structure
+                             this.cart = parsed.items;
+                        } else {
+                            this.cart = [];
+                        }
+                    } else {
+                        console.log(`⚠️ No data found in localStorage for key: ${storageKey}`);
+                        this.cart = [];
+                    }
+                } catch(e) {
+                    console.error('❌ Raw local load failed:', e);
+                    this.cart = [];
+                }
+            }
+            
+            console.log(`🛒 Cart initialized from ${storageKey} with`, this.cart.length, 'items');
+            this.updateCartBadge();
+            
+            // SLOW PATH: Sync with backend in background
+            // Use setTimeout to push this to next tick, ensuring initCart returns IMMEDIATELY
+            setTimeout(() => {
+                if (window.backend) {
+                    this.syncBackend();
+                }
+            }, 100);
+            
         } catch (e) {
             console.error('Error initializing cart:', e);
             this.cart = [];
         }
-        this.updateCartBadge();
         
         // Listen for storage changes to sync across tabs
         window.addEventListener('storage', async (e) => {
-            if (e.key === 'cart') {
+            const currentKey = this.getStorageKey();
+            if (e.key === currentKey) {
                 console.log('🔄 Cart updated in another tab, reloading...');
-                this.cart = await this.loadCart();
+                // Reload from localStorage directly
+                const raw = localStorage.getItem(currentKey);
+                if (raw) {
+                    try {
+                        const parsed = JSON.parse(raw);
+                        const cartDoc = Array.isArray(parsed) ? parsed.find(doc => doc.id === 'current') : null;
+                        this.cart = cartDoc ? (cartDoc.items || []) : (Array.isArray(parsed) ? parsed : []);
+                    } catch(e) {}
+                }
                 this.updateCartBadge();
+                if (typeof window.displayCart === 'function') {
+                    window.displayCart();
+                }
             }
         });
+    }
+
+    async syncBackend() {
+        try {
+            // Only sync if we have a real backend connection
+            if (window.backend && window.backend.useFirestore) {
+                const serverCart = await window.backend.loadCart();
+                // Only overwrite if server has data, to avoid wiping local work
+                if (serverCart && Array.isArray(serverCart)) {
+                    this.cart = serverCart;
+                    this.updateCartBadge();
+                    // Refresh UI if on cart page
+                    if (typeof window.displayCart === 'function') {
+                        window.displayCart();
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Background sync failed:', e);
+        }
     }
 
     async loadCart() {
@@ -32,7 +152,8 @@ class CartManager {
             return cart || [];
         }
         
-        const cartJson = localStorage.getItem('cart');
+        const storageKey = this.getStorageKey();
+        const cartJson = localStorage.getItem(storageKey);
         if (!cartJson) return [];
 
         try {
@@ -53,23 +174,42 @@ class CartManager {
     }
 
     async saveCart() {
-        // Save to backend (Firestore or localStorage)
+        // Always save to local storage with the correct user-specific key first
+        // This ensures the local cache matches what initCart looks for
+        const storageKey = this.getStorageKey();
+        const timestamp = Date.now();
+        
         try {
-            if (window.backend) {
+            // Add timestamp to ensure cache invalidation
+            const cartData = {
+                items: this.cart,
+                timestamp: timestamp,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(storageKey, JSON.stringify(this.cart));
+            localStorage.setItem(`${storageKey}_meta`, JSON.stringify({ timestamp }));
+            console.log(`💾 Saved cart to local storage: ${storageKey} (${this.cart.length} items)`);
+        } catch (e) {
+            console.error('Error saving to local storage:', e);
+            if (e.name === 'QuotaExceededError') {
+                this.showNotification('Storage full! Cart saved temporarily.', 'warning');
+            }
+        }
+
+        // Then sync to backend (Firestore) if available
+        try {
+            if (window.backend && window.backend.useFirestore) {
                 const result = await window.backend.saveCart(this.cart);
                 if (result && !result.success) {
-                    console.error('Failed to save cart:', result.error);
-                    // Don't throw, just log. We keep in-memory state.
-                    if (result.error === 'Storage full') {
-                        alert('Warning: Local storage is full. Your cart items are saved temporarily but may be lost if you close the browser. Please clear some space or complete your order.');
-                    }
+                    console.error('Failed to save cart to backend:', result.error);
                 }
             } else {
-                localStorage.setItem('cart', JSON.stringify(this.cart));
+                console.log('ℹ️ Backend not available or Firestore not configured - using localStorage only');
             }
         } catch (e) {
-            console.error('Error saving cart:', e);
+            console.error('Error saving cart to backend:', e);
         }
+        
         this.updateCartBadge();
     }
 
@@ -92,7 +232,7 @@ class CartManager {
                 if (existingItem.quantity < book.stock) {
                     existingItem.quantity++;
                 } else {
-                    alert('Maximum stock reached!');
+                    this.showNotification('Maximum stock reached!', 'warning');
                     return;
                 }
             } else {
@@ -104,23 +244,46 @@ class CartManager {
             }
 
             console.log('💾 Saving cart...');
-            await this.saveCart();
+            console.log('📊 Current cart state:', JSON.stringify(this.cart));
+            
+            // CRITICAL: Save immediately (synchronously) to localStorage first
+            const storageKey = this.getStorageKey();
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(this.cart));
+                console.log(`✅ Immediate save to ${storageKey}: ${this.cart.length} items`);
+            } catch (e) {
+                console.error('❌ Immediate save failed:', e);
+            }
+            
+            // Optimistic update: Update UI immediately
+            this.updateCartBadge();
             this.showNotification('Added to cart!');
+            
+            // Save to backend in background (non-blocking)
+            setTimeout(() => {
+                this.saveCart().catch(err => console.error('Background save failed:', err));
+            }, 0);
+            
             console.log('✅ Cart updated, total items:', this.getItemCount());
         } catch (error) {
             console.error('❌ Error adding to cart:', error);
-            alert('Failed to add to cart. Please try again.');
+            this.showNotification('Failed to add to cart', 'error');
         }
     }
 
     async removeFromCart(bookId) {
         this.cart = this.cart.filter(item => item.id !== bookId);
-        await this.saveCart();
+        
+        // Optimistic update
         this.updateCartBadge();
-        // Refresh modal if open
         if (document.getElementById('cartModal')) {
             this.openCartModal();
         }
+        
+        // Save in background
+        setTimeout(() => {
+            this.saveCart().catch(err => console.error('Background save failed:', err));
+        }, 0);
     }
 
     async updateQuantity(bookId, quantity) {
@@ -130,14 +293,19 @@ class CartManager {
                 await this.removeFromCart(bookId);
             } else if (quantity <= item.stock) {
                 item.quantity = quantity;
-                await this.saveCart();
+                
+                // Optimistic update
                 this.updateCartBadge();
-                // Refresh modal if open
                 if (document.getElementById('cartModal')) {
                     this.openCartModal();
                 }
+                
+                // Save in background
+                setTimeout(() => {
+                    this.saveCart().catch(err => console.error('Background save failed:', err));
+                }, 0);
             } else {
-                alert('Maximum stock reached!');
+                this.showNotification('Maximum stock reached!', 'warning');
             }
         }
     }
@@ -154,7 +322,7 @@ class CartManager {
         return this.cart.reduce((count, item) => count + item.quantity, 0);
     }
 
-    async clearCart() {
+    async clearCart() { 
         this.cart = [];
         await this.saveCart();
     }
@@ -179,28 +347,49 @@ class CartManager {
         });
     }
 
-    showNotification(message) {
+    showNotification(message, type = 'success') {
         // Simple notification
         const notification = document.createElement('div');
+        
+        let bgColor = '#10B981'; // Success green
+        let icon = 'check-circle';
+        
+        if (type === 'error') {
+            bgColor = '#EF4444'; // Error red
+            icon = 'times-circle';
+        } else if (type === 'warning') {
+            bgColor = '#F59E0B'; // Warning amber
+            icon = 'exclamation-triangle';
+        }
+        
         notification.style.cssText = `
             position: fixed;
             top: 80px;
             right: 20px;
-            background-color: #10B981;
+            background-color: ${bgColor};
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 3000;
             animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
         `;
-        notification.textContent = message;
+        
+        notification.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        `;
+        
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
+            notification.style.animation = 'slideOut 0.3s ease forwards';
             setTimeout(() => notification.remove(), 300);
-        }, 2000);
+        }, 3000);
     }
 
     openCartModal() {
@@ -305,6 +494,20 @@ class CartManager {
 
 // Initialize cart manager
 const cartManager = new CartManager();
+
+// Listen for login/logout events to reload cart
+window.addEventListener('userProfileUpdated', () => {
+    console.log('👤 User profile updated - reloading cart...');
+    cartManager.initCart();
+});
+
+// Also listen for storage events on currentUser to detect login/logout in other tabs
+window.addEventListener('storage', (e) => {
+    if (e.key === 'booknest_current_user' || e.key === 'currentUser') {
+        console.log('👤 Auth state changed - reloading cart...');
+        cartManager.initCart();
+    }
+});
 
 // Mobile Sidebar Toggle
 function toggleMobileSidebar() {
