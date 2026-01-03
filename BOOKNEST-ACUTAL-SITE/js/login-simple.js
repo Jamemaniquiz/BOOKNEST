@@ -64,6 +64,8 @@ function setupLoginForm() {
         
         const email = emailInput.value.trim();
         const password = passwordInput.value;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
 
         if (!isValidGmail(email)) {
             showNotification('Please enter a valid Gmail address (@gmail.com)', 'error');
@@ -75,19 +77,32 @@ function setupLoginForm() {
             return;
         }
 
-        const result = await auth.login(email, password);
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+        submitBtn.disabled = true;
 
-        if (result.success) {
-            showNotification('Login successful! Redirecting...', 'success');
-            setTimeout(() => {
-                if (result.user.role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = '../home.html';
-                }
-            }, 500);
-        } else {
-            showNotification(result.message, 'error');
+        try {
+            const result = await auth.login(email, password);
+
+            if (result.success) {
+                showNotification('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    if (result.user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = '../home.html';
+                    }
+                }, 500);
+            } else {
+                showNotification(result.message, 'error');
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
         }
     });
 }

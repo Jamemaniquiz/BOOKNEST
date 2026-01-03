@@ -381,20 +381,39 @@ Verification Code: ${code}
     }
 
     async getAllUsers() {
+        let cloudUsers = [];
         if (window.backend) {
             try {
-                // Use standard 'users' collection which maps to Firestore 'users' collection
-                const allDocs = await window.backend.load('users');
-                // Filter out guest documents (which start with 'guest_')
-                // Guest documents are created by cart/order logic for non-logged-in users
-                // We only want registered users here
-                return allDocs.filter(doc => doc.id && !doc.id.startsWith('guest_'));
+                // Force online check
+                if (navigator.onLine && window.backend.db) {
+                    console.log('🔍 Auth: Fetching users from Firestore...');
+                    // Direct Firestore fetch to bypass backend cache logic if needed
+                    const snapshot = await window.backend.db.collection('users').get();
+                    snapshot.forEach(doc => {
+                        cloudUsers.push({ id: doc.id, ...doc.data() });
+                    });
+                    console.log(`🔍 Auth: Fetched ${cloudUsers.length} users from Firestore.`);
+                } else {
+                    // Use backend wrapper
+                    cloudUsers = await window.backend.load('users');
+                }
             } catch (e) {
                 console.warn('Backend load failed, falling back to local', e);
             }
         }
+        
         // Fallback to local storage 'users' key (migrated from booknest_users)
-        return JSON.parse(localStorage.getItem('users') || localStorage.getItem('booknest_users') || '[]');
+        const localUsers = JSON.parse(localStorage.getItem('users') || localStorage.getItem('booknest_users') || '[]');
+        
+        // Merge lists, preferring cloud data
+        const allUsers = [...cloudUsers];
+        localUsers.forEach(u => {
+            if (!allUsers.find(existing => existing.email === u.email)) {
+                allUsers.push(u);
+            }
+        });
+
+        return allUsers.filter(doc => doc.id && !doc.id.startsWith('guest_'));
     }
 
     async updateUserProfile(updatedData) {
