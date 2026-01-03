@@ -2824,10 +2824,24 @@ async function viewInvoice(orderId) {
 window.viewInvoice = viewInvoice;
 
 // --- SYNC UTILITY ---
-async function syncLocalUsersToFirestore() {
+window.syncLocalUsersToFirestore = async function(isManual = false) {
     if (!window.backend) {
         console.log('Backend not ready for sync');
+        if (isManual) alert('Backend not ready. Please wait a moment.');
         return;
+    }
+    
+    if (isManual) {
+        const btn = document.querySelector('button[onclick*="syncLocalUsersToFirestore"]');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
     }
     
     console.log('🔄 Starting User Sync...');
@@ -2846,6 +2860,7 @@ async function syncLocalUsersToFirestore() {
 
     if (allLocalUsers.length === 0) {
         console.log('No local users to sync.');
+        if (isManual) alert('No local users found to sync.');
         return;
     }
 
@@ -2866,10 +2881,14 @@ async function syncLocalUsersToFirestore() {
     
     if (syncedCount > 0) {
         console.log(`✅ Successfully synced ${syncedCount} users to Firestore.`);
+        if (isManual) alert(`Successfully synced ${syncedCount} users to the live database!`);
+        
         // Refresh table if we are on the users section
         const currentSection = document.querySelector('.dashboard-section.active');
         if (currentSection && currentSection.id === 'users-section') {
             loadUsersTable();
         }
+    } else {
+        if (isManual) alert('Sync complete. No new users needed syncing (all up to date).');
     }
 }

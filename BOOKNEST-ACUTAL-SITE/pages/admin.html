@@ -255,6 +255,9 @@
                 <h1><i class="fas fa-users"></i> Manage Users</h1>
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <input type="text" id="searchUsers" placeholder="🔍 Search users..." style="padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; min-width: 250px;">
+                    <button onclick="window.syncLocalUsersToFirestore && window.syncLocalUsersToFirestore(true)" style="padding: 0.5rem 1rem; background: #d97706; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'" title="Upload local users to database">
+                        <i class="fas fa-cloud-upload-alt"></i> Force Sync
+                    </button>
                     <button onclick="loadUsersTable()" style="padding: 0.5rem 1rem; background: #2F5D62; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#1F3D40'" onmouseout="this.style.background='#2F5D62'">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
