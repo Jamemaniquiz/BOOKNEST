@@ -130,14 +130,26 @@ class CartManager {
             // Only sync if we have a real backend connection
             if (window.backend && window.backend.useFirestore) {
                 const serverCart = await window.backend.loadCart();
-                // Only overwrite if server has data, to avoid wiping local work
-                if (serverCart && Array.isArray(serverCart)) {
+                
+                // Conflict Resolution Strategy:
+                // 1. If server has data, it usually wins (cross-device sync).
+                // 2. If server is empty but local has data, it means we just connected/registered. Push local to server.
+                
+                if (serverCart && Array.isArray(serverCart) && serverCart.length > 0) {
+                    console.log('📥 Sync: Server has data, updating local cart');
                     this.cart = serverCart;
-                    this.updateCartBadge();
-                    // Refresh UI if on cart page
-                    if (typeof window.displayCart === 'function') {
-                        window.displayCart();
-                    }
+                    // Update local storage to match server
+                    const storageKey = this.getStorageKey();
+                    localStorage.setItem(storageKey, JSON.stringify(this.cart));
+                } else if (this.cart.length > 0) {
+                    console.log('📤 Sync: Server empty, pushing local cart to server');
+                    await window.backend.saveCart(this.cart);
+                }
+                
+                this.updateCartBadge();
+                // Refresh UI if on cart page
+                if (typeof window.displayCart === 'function') {
+                    window.displayCart();
                 }
             }
         } catch (e) {

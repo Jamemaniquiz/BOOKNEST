@@ -466,7 +466,18 @@
                         </button>
                     </div>
                 </div>
-            `;
+                `;
+            } catch (error) {
+                console.error('Error rendering cart:', error);
+                cartContent.innerHTML = `
+                    <div class="cart-empty">
+                        <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                        <h2>Something went wrong</h2>
+                        <p>We couldn't load your cart items. Please try refreshing.</p>
+                        <p style="font-size: 0.8rem; color: #666;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
         function updateQuantity(bookId, quantity) {
