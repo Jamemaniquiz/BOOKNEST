@@ -395,6 +395,9 @@
                         <button class="btn btn-primary" onclick="switchToEditMode()">
                             <i class="fas fa-edit"></i> Edit Profile
                         </button>
+                        <button class="btn" onclick="forceSyncProfile()" style="background: #d97706; color: white; border: none;">
+                            <i class="fas fa-cloud-upload-alt"></i> Sync to Cloud
+                        </button>
                     </div>
                 </div>
             </div>
@@ -528,6 +531,30 @@
                 await CustomModal.success('Profile updated successfully!', 'Success');
             } else {
                 await CustomModal.error('Failed to update profile', 'Error');
+            }
+        }
+
+        async function forceSyncProfile() {
+            if (!currentUser) return;
+            
+            const btn = document.querySelector('button[onclick="forceSyncProfile()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            btn.disabled = true;
+
+            try {
+                if (window.backend) {
+                    await window.backend.save('users', currentUser, currentUser.id);
+                    await CustomModal.success('Profile synced to cloud successfully! You can now login on other devices.', 'Sync Complete');
+                } else {
+                    throw new Error('Backend not ready');
+                }
+            } catch (e) {
+                console.error(e);
+                await CustomModal.error('Sync failed. Please check your internet connection.', 'Sync Error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
