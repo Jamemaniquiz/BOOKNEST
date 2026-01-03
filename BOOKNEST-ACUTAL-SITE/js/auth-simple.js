@@ -31,6 +31,25 @@ class SimpleAuth {
     constructor() {
         this.currentUser = this.loadUser();
         this.migrateData();
+        
+        // Auto-sync user to backend if online
+        // Use setTimeout to ensure backend is fully ready
+        setTimeout(() => {
+            if (this.currentUser && window.backend) {
+                this.syncUserToBackend();
+            }
+        }, 2000);
+    }
+
+    async syncUserToBackend() {
+        if (!this.currentUser || !window.backend) return;
+        try {
+            console.log('🔄 Auto-syncing user profile to backend...');
+            await window.backend.save('users', this.currentUser, this.currentUser.id);
+            console.log('✅ User profile synced to Firestore.');
+        } catch (e) {
+            console.error('User sync failed:', e);
+        }
     }
 
     migrateData() {
