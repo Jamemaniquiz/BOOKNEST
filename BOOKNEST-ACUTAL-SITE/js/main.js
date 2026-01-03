@@ -28,19 +28,29 @@ function initializeApp() {
         }
     } catch (e) { console.error('Badge fix failed', e); }
 
-    // AUTO-SYNC: Ensure current user is in Firestore
-    setTimeout(async () => {
-        if (auth.isLoggedIn() && window.backend) {
+    // AUTO-SYNC: Ensure current user is in Firestore (Retry mechanism)
+    const attemptSync = (retryCount = 0) => {
+        if (retryCount > 5) {
+            console.log('❌ Auto-sync gave up after 5 attempts.');
+            return;
+        }
+
+        if (auth.isLoggedIn() && window.backend && window.backend.db) {
             const user = auth.currentUser;
             if (user && user.id && !user.id.startsWith('guest_')) {
-                console.log('🔄 Auto-syncing current user to cloud...');
-                try {
-                    await window.backend.save('users', user, user.id);
-                    console.log('✅ User synced to cloud.');
-                } catch (e) { console.error('Auto-sync failed', e); }
+                console.log(`🔄 Auto-syncing current user to cloud (Attempt ${retryCount + 1})...`);
+                window.backend.save('users', user, user.id)
+                    .then(() => console.log('✅ User synced to cloud successfully.'))
+                    .catch(e => console.error('Auto-sync failed', e));
             }
+        } else {
+            // Backend not ready yet, wait and retry
+            setTimeout(() => attemptSync(retryCount + 1), 2000);
         }
-    }, 3000); // Wait 3s for backend to init
+    };
+    
+    // Start sync attempts
+    setTimeout(() => attemptSync(), 1000);
     
     // Setup event listeners
     setupEventListeners();

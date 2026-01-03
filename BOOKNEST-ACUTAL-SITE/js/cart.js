@@ -88,6 +88,16 @@ class CartManager {
                 }
             }
             
+            // SANITIZE CART: Remove nulls, undefineds, and invalid items
+            if (this.cart && this.cart.length > 0) {
+                const originalLength = this.cart.length;
+                this.cart = this.cart.filter(item => item && typeof item === 'object' && (item.id || item.title));
+                if (this.cart.length !== originalLength) {
+                    console.warn(`🧹 Sanitized cart: Removed ${originalLength - this.cart.length} invalid items.`);
+                    this.saveCart(); // Save the clean version back
+                }
+            }
+            
             console.log(`🛒 Cart initialized from ${storageKey} with`, this.cart.length, 'items');
             this.updateCartBadge();
             
